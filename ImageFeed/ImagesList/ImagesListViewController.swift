@@ -22,6 +22,7 @@ final class ImagesListViewController: UIViewController {
         return formatter
     }()
     private let currentDate = Date()
+    private let showSingleImageSegueIdentifier = "ShowSingleImage"
     
     // MARK: - Private Methods
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
@@ -42,11 +43,31 @@ final class ImagesListViewController: UIViewController {
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
     }
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            if segue.identifier == showSingleImageSegueIdentifier { // 1
+                guard
+                    let viewController = segue.destination as? SingleImageViewController, // 2
+                    let indexPath = sender as? IndexPath // 3
+                else {
+                    assertionFailure("Invalid segue destination") // 4
+                    return
+                }
+
+                let image = UIImage(named: photosName[indexPath.row]) // 5
+                
+                viewController.image = image
+                
+            } else {
+                super.prepare(for: segue, sender: sender) // 7
+            }
+        }
     
     
 }
 extension ImagesListViewController: UITableViewDelegate {
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) { } // TODO: - Добавить логику при нажатии на ячейку
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
+    }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         guard let image = UIImage(named: photosName[indexPath.row]) else {
             return 0
