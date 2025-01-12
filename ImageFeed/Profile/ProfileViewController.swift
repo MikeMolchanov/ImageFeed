@@ -7,61 +7,105 @@
 
 import UIKit
 
-class ProfileViewController: UIViewController {
-    private var label: UILabel?
+final class ProfileViewController: UIViewController {
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        let profileImage = UIImage(named: "Photo")
-        let imageView = UIImageView(image: profileImage)
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(imageView)
-        imageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20).isActive = true
-        imageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
-        imageView.widthAnchor.constraint(equalToConstant: 70).isActive = true
-        imageView.heightAnchor.constraint(equalToConstant: 70).isActive = true
-        
+    private let avatarImageView : UIImageView = {
+        let view = UIImageView()
+        let image = UIImage(named: "Photo")
+        view.image = image
+        return view
+    }()
+    private let nameLabel : UILabel = {
         let label = UILabel()
         label.text = "Екатерина Новикова"
         label.textColor = .ypWhite
         let fontSize: CGFloat = 23.0
         label.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
-        label.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label)
-        label.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
-        label.topAnchor.constraint(equalTo: imageView.bottomAnchor, constant: 8).isActive = true
-        self.label = label
-        
-        let label2 = UILabel()
-        label2.text = "@ekaterina_nov"
-        label2.textColor = .ypGray
-        let fontSize2: CGFloat = 13.0
-        label2.font = UIFont.systemFont(ofSize: fontSize2, weight: .regular)
-        label2.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label2)
-        label2.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
-        label2.topAnchor.constraint(equalTo: label.bottomAnchor, constant: 8).isActive = true
-        self.label = label2
-        
-        let label3 = UILabel()
-        label3.text = "Hello, world!"
-        label3.textColor = .ypWhite
-        let fontSize3: CGFloat = 13.0
-        label3.font = UIFont.systemFont(ofSize: fontSize3, weight: .regular)
-        label3.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(label3)
-        label3.leadingAnchor.constraint(equalTo: imageView.leadingAnchor).isActive = true
-        label3.topAnchor.constraint(equalTo: label2.bottomAnchor, constant: 8).isActive = true
-        self.label = label3
-        
+        return label
+    }()
+    private let loginNameLabel : UILabel = {
+        let label = UILabel()
+        label.text = "@ekaterina_nov"
+        label.textColor = .ypGray
+        let fontSize: CGFloat = 13.0
+        label.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
+        return label
+    }()
+    private let descriptionLabel : UILabel = {
+        let label = UILabel()
+        label.text = "Hello, world!"
+        label.textColor = .ypWhite
+        let fontSize: CGFloat = 13.0
+        label.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
+        return label
+    }()
+    private let logoutButton : UIButton = {
         let button = UIButton()
         let buttonImage = UIImage(named: "Exit")
         button.setImage(buttonImage, for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(button)
-        button.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24).isActive = true
-        button.centerYAnchor.constraint(equalTo: imageView.centerYAnchor).isActive = true
+        return button
+    }()
+    private func setupViews() {
+            [avatarImageView, nameLabel, loginNameLabel, descriptionLabel, logoutButton].forEach {
+                $0.translatesAutoresizingMaskIntoConstraints = false
+                view.addSubview($0)
+            }
+        }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        setupViews()
+        
+//        let profileImage = UIImage(named: "Photo")
+//        let avatarImageView = UIImageView(image: profileImage)
+//        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(avatarImageView)
+        avatarImageView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20).isActive = true
+        avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20).isActive = true
+        avatarImageView.widthAnchor.constraint(equalToConstant: 70).isActive = true
+        avatarImageView.heightAnchor.constraint(equalToConstant: 70).isActive = true
+        
+//        let nameLabel = UILabel()
+//        nameLabel.text = "Екатерина Новикова"
+//        nameLabel.textColor = .ypWhite
+//        let fontSize: CGFloat = 23.0
+//        nameLabel.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(nameLabel)
+        nameLabel.leadingAnchor.constraint(equalTo: avatarImageView.leadingAnchor).isActive = true
+        nameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 8).isActive = true
+//        self.label = nameLabel
+        
+//        let loginNameLabel = UILabel()
+//        loginNameLabel.text = "@ekaterina_nov"
+//        loginNameLabel.textColor = .ypGray
+//        let fontSize2: CGFloat = 13.0
+//        loginNameLabel.font = UIFont.systemFont(ofSize: fontSize2, weight: .regular)
+//        loginNameLabel.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(loginNameLabel)
+        loginNameLabel.leadingAnchor.constraint(equalTo: avatarImageView.leadingAnchor).isActive = true
+        loginNameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8).isActive = true
+//        self.label = loginNameLabel
+        
+//        let descriptionLabel = UILabel()
+//        descriptionLabel.text = "Hello, world!"
+//        descriptionLabel.textColor = .ypWhite
+//        let fontSize3: CGFloat = 13.0
+//        descriptionLabel.font = UIFont.systemFont(ofSize: fontSize3, weight: .regular)
+//        descriptionLabel.translatesAutoresizingMaskIntoConstraints = false
+//        view.addSubview(descriptionLabel)
+        descriptionLabel.leadingAnchor.constraint(equalTo: avatarImageView.leadingAnchor).isActive = true
+        descriptionLabel.topAnchor.constraint(equalTo: loginNameLabel.bottomAnchor, constant: 8).isActive = true
+//        self.label = descriptionLabel
+        
+//        let logoutButton = UIButton()
+//        let buttonImage = UIImage(named: "Exit")
+//        logoutButton.setImage(buttonImage, for: .normal)
+        logoutButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(logoutButton)
+        logoutButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24).isActive = true
+        logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor).isActive = true
     }
     
 }

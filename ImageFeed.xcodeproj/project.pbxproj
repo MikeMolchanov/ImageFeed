@@ -16,6 +16,7 @@
 		87B61A032CF8FEA9004D102B /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 87B61A022CF8FEA9004D102B /* Base */; };
 		87DA94902CFF89B0003C2561 /* ImagesListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DA948F2CFF89B0003C2561 /* ImagesListCell.swift */; };
 		87DA94932D047411003C2561 /* ProfileViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DA94922D047411003C2561 /* ProfileViewController.swift */; };
+		87F3F2052D32B436008D001D /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F3F2042D32B436008D001D /* Constants.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		87B61A042CF8FEA9004D102B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		87DA948F2CFF89B0003C2561 /* ImagesListCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagesListCell.swift; sourceTree = "<group>"; };
 		87DA94922D047411003C2561 /* ProfileViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewController.swift; sourceTree = "<group>"; };
+		87F3F2042D32B436008D001D /* Constants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constants.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 				87DA94912CFF8A23003C2561 /* ImagesList */,
 				87B619F62CF8FEA5004D102B /* AppDelegate.swift */,
 				87B619F82CF8FEA5004D102B /* SceneDelegate.swift */,
+				87F3F2042D32B436008D001D /* Constants.swift */,
 				87B619FC2CF8FEA5004D102B /* Main.storyboard */,
 				87B619FF2CF8FEA9004D102B /* Assets.xcassets */,
 				87B61A012CF8FEA9004D102B /* LaunchScreen.storyboard */,
@@ -175,6 +178,7 @@
 				87DA94902CFF89B0003C2561 /* ImagesListCell.swift in Sources */,
 				87DA94932D047411003C2561 /* ProfileViewController.swift in Sources */,
 				87B619F72CF8FEA5004D102B /* AppDelegate.swift in Sources */,
+				87F3F2052D32B436008D001D /* Constants.swift in Sources */,
 				8751009B2D07603200CCFBDF /* SingleImageViewController.swift in Sources */,
 				87B619F92CF8FEA5004D102B /* SceneDelegate.swift in Sources */,
 			);
