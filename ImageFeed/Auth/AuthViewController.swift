@@ -6,33 +6,9 @@
 //
 
 import UIKit
-
-//final class OAuth2Service {
-//    static let shared = OAuth2Service() // 1
-//    private init() {}                   // 2
-//    
-//    func makeOAuthTokenRequest(code: String) -> URLRequest? {
-//        guard let baseURL = URL(string: "https://unsplash.com") else {
-//                return nil
-//            }
-//         guard let url = URL(
-//             string: "/oauth/token"
-//             + "?client_id=\(Constants.accessKey)"         // Используем знак ?, чтобы начать перечисление параметров запроса
-//             + "&&client_secret=\(Constants.secretKey)"    // Используем &&, чтобы добавить дополнительные параметры
-//             + "&&redirect_uri=\(Constants.redirectURI)"
-//             + "&&code=\(code)"
-//             + "&&grant_type=authorization_code",
-//             relativeTo: baseURL                           // Опираемся на основной или базовый URL, которые содержат схему и имя хоста
-//         )
-//        else {
-//             return nil
-//         }
-//         var request = URLRequest(url: url)
-//         request.httpMethod = "POST"
-//         return request
-//     }
-//    
-//}
+protocol AuthViewControllerDelegate: AnyObject {
+    func didAuthenticate(_ vc: AuthViewController)
+}
 
 final class AuthViewController: UIViewController {
     @IBAction func loginButtonTapped(_ sender: UIButton) {
@@ -43,8 +19,27 @@ final class AuthViewController: UIViewController {
         navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
         navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "ypBlack") 
+        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "ypBlack")
     }
+    
+    weak var delegate: AuthViewControllerDelegate?
+    
+    private func switchToMainInterface() {
+        guard let window = UIApplication.shared.windows.first else { return }
+        let tabBarVC = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(withIdentifier: "TabBarViewController")
+        window.rootViewController = tabBarVC
+    }
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
             guard
@@ -67,10 +62,24 @@ final class AuthViewController: UIViewController {
 }
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        //TODO: process code
+        vc.dismiss(animated: true) // Закрыли WebView
+        
+        OAuth2Service.shared.fetchOAuthToken(code: code) { result in
+            DispatchQueue.main.async {
+                switch result {
+                case.success(let token):
+                    OAuth2TokenStorage.shared.token = token
+                    self.delegate?.didAuthenticate(self) // Вызываем метод делегата!
+                    
+                case .failure(let error):
+                    // Обработка ошибки
+                    self.showErrorAlert(message: error.localizedDescription)
+                }
+            }
+        }
     }
-
+    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
-        vc.dismiss(animated: true)
+        dismiss(animated: true) // Закрываем AuthViewController
     }
 }
