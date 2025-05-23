@@ -32,7 +32,6 @@ final class WebViewViewController: UIViewController {
         updateProgress()
     }
     
-    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         // NOTE: Since the class is marked as `final` we don't need to pass a context.
