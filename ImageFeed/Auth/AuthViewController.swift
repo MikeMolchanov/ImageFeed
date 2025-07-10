@@ -6,39 +6,16 @@
 //
 
 import UIKit
+import ProgressHUD
 protocol AuthViewControllerDelegate: AnyObject {
     func didAuthenticate(_ vc: AuthViewController)
 }
 
 final class AuthViewController: UIViewController {
-    @IBAction func loginButtonTapped(_ sender: UIButton) {
-    }
-    private let showWebViewSegueIdentifier = "ShowWebView"
-    
-    private func configureBackButton() {
-        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
-        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "ypBlack")
-    }
     
     weak var delegate: AuthViewControllerDelegate?
     
-    private func switchToMainInterface() {
-        guard let window = UIApplication.shared.windows.first else { return }
-        let tabBarVC = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "TabBarViewController")
-        window.rootViewController = tabBarVC
-    }
-    private func showErrorAlert(message: String) {
-        let alert = UIAlertController(
-            title: "Ошибка",
-            message: message,
-            preferredStyle: .alert
-        )
-        alert.addAction(UIAlertAction(title: "OK", style: .default))
-        present(alert, animated: true)
-    }
+    private let showWebViewSegueIdentifier = "ShowWebView"
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
@@ -59,26 +36,50 @@ final class AuthViewController: UIViewController {
         configureBackButton()
     }
     
+    private func switchToMainInterface() {
+        guard let window = UIApplication.shared.windows.first else { return }
+        let tabBarVC = UIStoryboard(name: "Main", bundle: .main)
+            .instantiateViewController(withIdentifier: "TabBarViewController")
+        window.rootViewController = tabBarVC
+    }
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Что-то пошло не так",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "Oк", style: .default))
+        present(alert, animated: true)
+    }
+    private func configureBackButton() {
+        navigationController?.navigationBar.backIndicatorImage = UIImage(named: "nav_back_button")
+        navigationController?.navigationBar.backIndicatorTransitionMaskImage = UIImage(named: "nav_back_button")
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        navigationItem.backBarButtonItem?.tintColor = UIColor(named: "ypBlack")
+    }
+    
+    @IBAction func loginButtonTapped(_ sender: UIButton) {
+    }
 }
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
         vc.dismiss(animated: true) // Закрыли WebView
+        UIBlockingProgressHUD.show()
         
         OAuth2Service.shared.fetchOAuthToken(code: code) { result in
             DispatchQueue.main.async {
+            UIBlockingProgressHUD.dismiss()
                 switch result {
                 case.success(let token):
                     OAuth2TokenStorage.shared.token = token
                     self.delegate?.didAuthenticate(self) // Вызываем метод делегата!
-                    
                 case .failure(let error):
                     // Обработка ошибки
-                    self.showErrorAlert(message: error.localizedDescription)
+                    self.showErrorAlert(message: "Не удалось войти в систему")
                 }
             }
         }
-    }
-    
+    }    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         dismiss(animated: true) // Закрываем AuthViewController
     }
