@@ -16,6 +16,9 @@ final class ProfileViewController: UIViewController {
     private let avatarImageView : UIImageView = {
         let view = UIImageView()
         let image = UIImage(named: "Photo")
+        view.contentMode = .scaleAspectFill
+        view.clipsToBounds = true
+        view.layer.cornerRadius = 35
         view.image = image
         return view
     }()
@@ -131,11 +134,9 @@ final class ProfileViewController: UIViewController {
             print("[ProfileViewController] Avatar URL is nil")
             return
         }
-        let processor = RoundCornerImageProcessor(cornerRadius: avatarImageView.frame.size.width / 2)
         avatarImageView.kf.setImage(
             with: url,
-            placeholder: UIImage(named: "Stub"),
-            options: [.processor(processor)])
+            placeholder: UIImage(named: "Stub"))
     }
     
     deinit {

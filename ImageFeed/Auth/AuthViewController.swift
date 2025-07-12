@@ -16,6 +16,7 @@ final class AuthViewController: UIViewController {
     weak var delegate: AuthViewControllerDelegate?
     
     private let showWebViewSegueIdentifier = "ShowWebView"
+    private var isAuthorizing = false  // 1. Объявляем флаг состояния
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showWebViewSegueIdentifier {
@@ -59,13 +60,19 @@ final class AuthViewController: UIViewController {
     }
     
     @IBAction func loginButtonTapped(_ sender: UIButton) {
+        guard !isAuthorizing else {return} // 2. Проверяем состояние
+        isAuthorizing = true // 3. Блокируем повторные нажатия
+        // Показываем индикатор загрузки сразу при нажатии
+        UIBlockingProgressHUD.show()
+        // Запуск процесса авторизации
+        performSegue(withIdentifier: "showAuthenticationScreen", sender: nil)
+        
     }
 }
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        vc.dismiss(animated: true) // Закрыли WebView
-        UIBlockingProgressHUD.show()
         
+        UIBlockingProgressHUD.show()
         OAuth2Service.shared.fetchOAuthToken(code: code) { result in
             DispatchQueue.main.async {
             UIBlockingProgressHUD.dismiss()
@@ -77,10 +84,17 @@ extension AuthViewController: WebViewViewControllerDelegate {
                     // Обработка ошибки
                     self.showErrorAlert(message: "Не удалось войти в систему")
                 }
+                // Закрываем WebView после завершения запроса
+                vc.dismiss(animated: true) {
+                    // Всегда сбрасываем флаг блокировки
+                    self.isAuthorizing = false
+                }
             }
         }
     }    
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         dismiss(animated: true) // Закрываем AuthViewController
+        self.isAuthorizing = false // сбрасываем флаг
+        UIBlockingProgressHUD.dismiss() // скрываем индикатор загрузки
     }
 }

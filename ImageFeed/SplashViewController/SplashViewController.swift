@@ -25,7 +25,7 @@ final class SplashViewController: UIViewController {
             switchToTabBarController()
             
         } else {
-            performSegue(withIdentifier: showAuthenticationScreenSegueIdentifier, sender: nil)
+            showAuthController()
         }
     }
     
@@ -55,8 +55,11 @@ final class SplashViewController: UIViewController {
         }
     }
     private func showAuthController() {
-        let authVC = UIStoryboard(name: "Main", bundle: .main)
-            .instantiateViewController(withIdentifier: "AuthViewController") as! AuthViewController
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+        guard let authVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
+            fatalError("Failed to instantiate AuthViewController from storyboard")
+        }
+            
         authVC.delegate = self
         authVC.modalPresentationStyle = .fullScreen
         
