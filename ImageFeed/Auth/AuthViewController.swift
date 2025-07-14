@@ -33,6 +33,8 @@ final class AuthViewController: UIViewController {
     }
     override func viewDidLoad() {
         super.viewDidLoad()
+        // Убедимся, что нет сохраненного токена при открытии экрана
+        OAuth2TokenStorage.shared.clearToken()
         
         configureBackButton()
     }
