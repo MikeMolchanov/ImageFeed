@@ -21,9 +21,7 @@ final class SplashViewController: UIViewController {
         super.viewDidAppear(animated)
         
         if let token = oauth2TokenStorage.token {
-            fetchProfile(token)
-            switchToTabBarController()
-            
+            fetchProfile(token) // Переход будет внутри fetchProfile при успехе (исправление замечания по 11 спринту)
         } else {
             showAuthController()
         }
@@ -74,7 +72,7 @@ final class SplashViewController: UIViewController {
             
             switch result {
             case .success:
-                self.switchToTabBarController()
+                self.switchToTabBarController() // ✅ Только здесь!
                 // 2. Запускаем загрузку аватарки (НЕ ждем завершения!)
                 if let username = profileService.profile?.username {
                     self.profileImageService.fetchProfileImageURL(username: username) { _ in
