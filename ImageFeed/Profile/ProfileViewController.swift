@@ -24,7 +24,7 @@ final class ProfileViewController: UIViewController {
     }()
     private let nameLabel : UILabel = {
         let label = UILabel()
-        label.text = "Екатерина Новикова"
+        label.text = ""
         label.textColor = .ypWhite
         let fontSize: CGFloat = 23.0
         label.font = UIFont.systemFont(ofSize: fontSize, weight: .bold)
@@ -32,7 +32,7 @@ final class ProfileViewController: UIViewController {
     }()
     private let loginNameLabel : UILabel = {
         let label = UILabel()
-        label.text = "@ekaterina_nov"
+        label.text = ""
         label.textColor = .ypGray
         let fontSize: CGFloat = 13.0
         label.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
@@ -40,7 +40,7 @@ final class ProfileViewController: UIViewController {
     }()
     private let descriptionLabel : UILabel = {
         let label = UILabel()
-        label.text = "Hello, world!"
+        label.text = ""
         label.textColor = .ypWhite
         let fontSize: CGFloat = 13.0
         label.font = UIFont.systemFont(ofSize: fontSize, weight: .regular)
