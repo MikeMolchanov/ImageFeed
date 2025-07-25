@@ -8,6 +8,7 @@
 import UIKit
 
 enum Constants {
+    static let authViewControllerID = "AuthViewController"
     static let accessKey = "KLjJjKd0HAHZefLoKnLVZ4ZfoJSiksS-riusDQ7l-R8"
     static let secretKey = "BUMJ2xFUy2GSnNNoRb07hBIY_DseyP5LcdjSxR54lno"
     static let redirectURI = "urn:ietf:wg:oauth:2.0:oob"
@@ -17,6 +18,5 @@ enum Constants {
             fatalError("Failed to create defaultBaseURL")
         }
         return url
-    }()
-    
+    }()    
 }
