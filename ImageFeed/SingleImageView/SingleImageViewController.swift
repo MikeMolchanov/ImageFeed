@@ -35,6 +35,7 @@ final class SingleImageViewController: UIViewController {
             rescaleAndCenterImageInScrollView(image: image)
         }
     }
+    var imageURL: URL?
     
     // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {

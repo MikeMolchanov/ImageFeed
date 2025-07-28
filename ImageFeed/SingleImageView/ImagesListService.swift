@@ -28,18 +28,21 @@ struct PhotoResult: Codable {
     let likes: Int
     let likedByUser: Bool
     let description: String?
-    
     let urls: UrlsResult
     
-    private enum CodingKeys: String, CodingKey {
+    // Измененные CodingKeys
+    enum CodingKeys: String, CodingKey {
         case id
-        case createdAt = "created_at"
+        case createdAt = "created_at"  // Явное указание snake_case
         case updatedAt = "updated_at"
-        case width, height, color
+        case width
+        case height
+        case color
         case blurHash = "blur_hash"
         case likes
         case likedByUser = "liked_by_user"
-        case description, urls
+        case description
+        case urls
     }
     
     struct UrlsResult: Codable {
@@ -57,7 +60,7 @@ final class ImagesListService {
     private(set) var photos: [Photo] = []
     
     private var lastLoadedPage: Int?
-    private var currentTask: URLSessionTask?
+     var currentTask: URLSessionTask?
     private var nextPage = 1
     
     
@@ -76,9 +79,12 @@ final class ImagesListService {
             return
         }
         
-        var currentTask = URLSession.shared.dataTask(with: request) {[weak self] data, _, error in
+        print("🔵 Начинаем загрузку страницы \(pageToLoad)")
+        
+        var currentTask = URLSession.shared.dataTask(with: request) {[weak self] data, response, error in
             guard let self = self else {return}
             defer{self.currentTask = nil} // Сброс флага при завершении
+            print("🔵 Задача завершена")
             
             if let error = error {
                 print("Ошибка сети: \(error.localizedDescription)")
@@ -88,20 +94,34 @@ final class ImagesListService {
                 print("Ошибка: нет данных")
                 return}
             
+            // 3. Логирование ответа
+            if let httpResponse = response as? HTTPURLResponse {
+                print("🔵 Ответ сервера: статус \(httpResponse.statusCode)")
+            }
+            
+            // 4. Печать первых 200 символов данных для проверки
+            let rawDataString = String(data: data.prefix(200), encoding: .utf8) ?? "Неизвестные данные"
+            print("🔵 Полученные данные (первые 200 символов):", rawDataString)
+            
             do {
                 let newPhotos = try self.parsePhotos(from: data) // Парсим JSON
+                print("🟢 Успешно распаршено фотографий:", newPhotos.count)
                 DispatchQueue.main.async {
                     self.nextPage += 1
                     self.photos.append(contentsOf: newPhotos)
+                    print("🟣 Текущее количество фото:", self.photos.count)
                     NotificationCenter.default.post(name: ImagesListService.didChangeNotification,
                                                     object: self)
+                    print("🔴 Уведомление отправлено")
                 }
             } catch {
                 print("Ошибка парсинга: \(error)")
             }
         }
         currentTask.resume()
+        print("🟠 Задача запущена")
     }
+    
     
     private func createRequest(page: Int, perPage: Int ) -> URLRequest? {
         let baseURL = "https://api.unsplash.com/photos"
@@ -121,12 +141,17 @@ final class ImagesListService {
     }
     private func parsePhotos(from data: Data) throws -> [Photo] {
         let decoder = JSONDecoder()
-        decoder.keyDecodingStrategy = .convertFromSnakeCase
         
-        let photoResults = try decoder.decode([PhotoResult].self, from: data)
+        // Убираем .convertFromSnakeCase - используем явные CodingKeys
+        decoder.keyDecodingStrategy = .useDefaultKeys
         
-        // Конвертируем [PhotoResult] в [Photo]
-        return photoResults.map { Photo.from(photoResult: $0) }
+        do {
+            let photoResults = try decoder.decode([PhotoResult].self, from: data)
+            return photoResults.map { Photo.from(photoResult: $0) }
+        } catch {
+            print("❌ Детальная ошибка парсинга:", error)
+            throw error
+        }
     }
 }
 
