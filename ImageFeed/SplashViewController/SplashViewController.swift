@@ -67,23 +67,19 @@ final class SplashViewController: UIViewController {
         UIBlockingProgressHUD.show()
         profileService.fetchProfile(token) { [weak self] result in
             UIBlockingProgressHUD.dismiss()
-            
             guard let self = self else { return }
             
             switch result {
             case .success:
-                self.switchToTabBarController() // ✅ Только здесь!
-                // 2. Запускаем загрузку аватарки (НЕ ждем завершения!)
-                if let username = profileService.profile?.username {
-                    self.profileImageService.fetchProfileImageURL(username: username) { _ in
-                        // Результат не важен на этом этапе
-                    }
+                if let username = self.profileService.profile?.username {
+                    self.profileImageService.fetchProfileImageURL(username: username) { _ in }
                 }
+                // Добавляем переход здесь!
+                self.switchToTabBarController()
                 
             case .failure(let error):
                 self.showErrorAlert(error: error) {
-                    // Дополнительные действия после показа ошибки
-                    self.fetchProfile(token) // повторная попытка
+                    self.fetchProfile(token)
                 }
             }
         }

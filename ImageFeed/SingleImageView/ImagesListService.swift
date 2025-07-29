@@ -59,6 +59,7 @@ final class ImagesListService {
     
     private(set) var photos: [Photo] = []
     
+    private var token = OAuth2TokenStorage.shared.token
     private var lastLoadedPage: Int?
      var currentTask: URLSessionTask?
     private var nextPage = 1
@@ -122,38 +123,38 @@ final class ImagesListService {
         print("🟠 Задача запущена")
     }
     
-    
-    private func createRequest(page: Int, perPage: Int ) -> URLRequest? {
-        let baseURL = "https://api.unsplash.com/photos"
-        var components = URLComponents(string: baseURL)
-        components?.queryItems = [
-            URLQueryItem(name: "page", value: String(page)),
-            URLQueryItem(name: "per_page", value: String(perPage))]
-        
-        guard let url = components?.url else {
-            print("Ошибка: неверный URL")
+    private func parsePhotos(from data: Data) throws -> [Photo] {
+        do {
+            // Декодируем как словарь с ключом "photos", если сервер так отвечает
+            struct Response: Decodable {
+                let photos: [PhotoResult]
+            }
+            let response = try JSONDecoder().decode(Response.self, from: data)
+            return response.photos.map { Photo.from(photoResult: $0) }
+        } catch {
+            // Если структура другая - пробуем декодировать как массив напрямую
+            return try JSONDecoder().decode([PhotoResult].self, from: data).map { Photo.from(photoResult: $0) }
+        }
+    }
+    private func createRequest(page: Int, perPage: Int) -> URLRequest? {
+        guard let token = OAuth2TokenStorage.shared.token else {
+            print("Token is missing")
             return nil
         }
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("695743 KLjJjKd0HAHZefLoKnLVZ4ZfoJSiksS-riusDQ7l-R8", forHTTPHeaderField: "Authorization") //найти свой ключ аккаунта Unsplash
+        
+        var components = URLComponents(string: "https://api.unsplash.com/photos")!
+        components.queryItems = [
+            URLQueryItem(name: "page", value: String(page)),
+            URLQueryItem(name: "per_page", value: String(perPage))
+        ]
+        
+        var request = URLRequest(url: components.url!)
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
     }
-    private func parsePhotos(from data: Data) throws -> [Photo] {
-        let decoder = JSONDecoder()
-        
-        // Убираем .convertFromSnakeCase - используем явные CodingKeys
-        decoder.keyDecodingStrategy = .useDefaultKeys
-        
-        do {
-            let photoResults = try decoder.decode([PhotoResult].self, from: data)
-            return photoResults.map { Photo.from(photoResult: $0) }
-        } catch {
-            print("❌ Детальная ошибка парсинга:", error)
-            throw error
-        }
-    }
 }
+
+
 
 extension Photo {
     static func from(photoResult: PhotoResult) -> Photo {

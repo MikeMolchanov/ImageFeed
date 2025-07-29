@@ -21,5 +21,11 @@
 			</array>
 		</dict>
 	</dict>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>CFBundleIdentifier</key>
+	<string></string>
+	<key>CFBundleExecutable</key>
+	<string></string>
 </dict>
 </plist>

@@ -9,6 +9,7 @@ import UIKit
 
 enum AuthServiceError: Error {
     case invalidRequest
+    case unauthorized
 }
 final class OAuth2Service {
     static let shared = OAuth2Service()
@@ -28,31 +29,52 @@ final class OAuth2Service {
             completion(.failure(AuthServiceError.invalidRequest))
             return
         }
-        // Вызываем completion для предыдущего запроса
+        
         currentCompletion?(.failure(NetworkError.requestCancelled))
         task?.cancel()
         lastCode = code
         currentCompletion = completion
-        // 2. Создаем запрос
+        
         guard let request = makeOAuthTokenRequest(code: code) else {
             completion(.failure(AuthServiceError.invalidRequest))
             return
         }
-        let task = URLSession.shared.objectTask(for: request) { [weak self] (result: Result<OAuthTokenResponseBody, Error>) in
+        
+        let task = urlSession.dataTask(with: request) { [weak self] data, response, error in
             guard let self = self else { return }
-            switch result {
-            case .success(let response):
-                // Сохраняем токен
-                OAuth2TokenStorage.shared.token = response.accessToken
-                completion(.success(response.accessToken))
-                
-            case .failure(let error):
-                print("[OAuth2Service.fetchOAuthToken] Error: \(error), code: \(code)")
+            
+            // Проверка на ошибку сети
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            // Проверка статус-кода
+            if let httpResponse = response as? HTTPURLResponse,
+               httpResponse.statusCode == 401 {
+                completion(.failure(AuthServiceError.unauthorized))
+                return
+            }
+            
+            // Обработка данных
+            guard let data = data else {
+                completion(.failure(NetworkError.noData))
+                return
+            }
+            
+            do {
+                let decoder = JSONDecoder()
+                let responseBody = try decoder.decode(OAuthTokenResponseBody.self, from: data)
+                OAuth2TokenStorage.shared.token = responseBody.accessToken
+                completion(.success(responseBody.accessToken))
+            } catch {
                 completion(.failure(error))
             }
+            
             self.task = nil
             self.lastCode = nil
         }
+        
         self.task = task
         task.resume()
     }

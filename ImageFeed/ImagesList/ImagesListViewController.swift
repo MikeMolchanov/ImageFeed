@@ -21,17 +21,6 @@ final class ImagesListViewController: UIViewController {
             return indicator
         }()
     
-    private func updateTableViewAnimated(newPhotos: [String]) {
-        let oldCount = photos.count
-        photos = imagesListService.photos
-        
-        tableView.performBatchUpdates {
-            let indexPaths = (oldCount..<newPhotos.count).map {
-                IndexPath(row: $0, section: 0)
-            }
-            tableView.insertRows(at: indexPaths, with: .automatic)
-        }
-    }
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -68,9 +57,8 @@ final class ImagesListViewController: UIViewController {
         cell.likeButton.setImage(likeImage, for: .normal)
     }
     private func loadPhotos() {
-        activityIndicatorView.startAnimating()
-        imagesListService.fetchPhotosNextPage() 
-        activityIndicatorView.stopAnimating()
+        UIBlockingProgressHUD.show()
+        imagesListService.fetchPhotosNextPage()
     }
     private func setupObserver() {
         NotificationCenter.default.addObserver(
@@ -82,15 +70,19 @@ final class ImagesListViewController: UIViewController {
         }
     }
     private func updateTableViewAnimated() {
-        let oldCount = photos.count
-        let newCount = imagesListService.photos.count
-        photos = imagesListService.photos // Обновляем данные
-        
-        tableView.performBatchUpdates {
-            let indexPaths = (oldCount..<newCount).map {
-                IndexPath(row: $0, section: 0)
-            }
-            tableView.insertRows(at: indexPaths, with: .automatic) // Анимация
+        DispatchQueue.main.async {
+            let oldCount = self.photos.count
+            let newCount = self.imagesListService.photos.count // Теперь это работает
+            guard newCount > oldCount else { return }
+            
+            self.photos = self.imagesListService.photos
+            
+            self.tableView.performBatchUpdates({
+                let indexPaths = (oldCount..<newCount).map {
+                    IndexPath(row: $0, section: 0)
+                }
+                self.tableView.insertRows(at: indexPaths, with: .automatic)
+            }, completion: nil)
         }
     }
     private func setupActivityIndicator() {
@@ -105,7 +97,7 @@ final class ImagesListViewController: UIViewController {
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
         setupActivityIndicator()
-        loadPhotos()
+        
         setupObserver()
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
