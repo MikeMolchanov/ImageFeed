@@ -19,7 +19,7 @@ struct Photo {
 }
 struct PhotoResult: Codable {
     let id: String
-    let createdAt: String
+    let createdAt: Date
     let updatedAt: String
     let width: Int
     let height: Int
@@ -54,7 +54,7 @@ final class ImagesListService {
     
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
-    private(set) var photos: [Photo] = []
+    var photos: [Photo] = []
     
     private var lastLoadedPage: Int?
     private var currentTask: URLSessionTask?
@@ -63,16 +63,29 @@ final class ImagesListService {
     
     
     
-    
+    func reset() {
+        photos = []
+        lastLoadedPage = nil
+        currentTask?.cancel()
+        currentTask = nil
+        nextPage = 1
+    }
     func fetchPhotosNextPage() {
         guard currentTask == nil else {
             print(" Загрузка уже идет, пропускаем новый запрос " )
             return
         }
-        let pageToLoad = nextPage
+        // Всегда сбрасываем на первую страницу при новой загрузке
+        let pageToLoad = (lastLoadedPage == nil) ? 1 : (lastLoadedPage! + 1)
         let perPage = 10
-        guard let request = createRequest(page: pageToLoad, perPage: perPage) else {
-            print ("Ошибка: неверный запрос")
+        
+        guard let token = OAuth2TokenStorage.shared.token else {
+            print("Ошибка: нет токена")
+            return
+        }
+        
+        guard let request = createRequest(page: pageToLoad, perPage: perPage, token: token) else {
+            print("Ошибка: неверный запрос")
             return
         }
         
@@ -91,10 +104,17 @@ final class ImagesListService {
             do {
                 let newPhotos = try self.parsePhotos(from: data) // Парсим JSON
                 DispatchQueue.main.async {
-                    self.nextPage += 1
-                    self.photos.append(contentsOf: newPhotos)
-                    NotificationCenter.default.post(name: ImagesListService.didChangeNotification,
-                                                    object: self)
+                    if pageToLoad == 1 {
+                        self.photos = newPhotos
+                    } else {
+                        self.photos.append(contentsOf: newPhotos)
+                    }
+                    
+                    self.lastLoadedPage = pageToLoad
+                    NotificationCenter.default.post(
+                        name: ImagesListService.didChangeNotification,
+                        object: self
+                    )
                 }
             } catch {
                 print("Ошибка парсинга: \(error)")
@@ -103,50 +123,57 @@ final class ImagesListService {
         currentTask.resume()
     }
     
-    private func createRequest(page: Int, perPage: Int ) -> URLRequest? {
-        let baseURL = "https://api.unsplash.com/photos"
-        var components = URLComponents(string: baseURL)
-        components?.queryItems = [
+    private func createRequest(page: Int, perPage: Int, token: String) -> URLRequest? {
+        var components = URLComponents(string: "https://api.unsplash.com/photos")!
+        components.queryItems = [
             URLQueryItem(name: "page", value: String(page)),
-            URLQueryItem(name: "per_page", value: String(perPage))]
+            URLQueryItem(name: "per_page", value: String(perPage))
+        ]
         
-        guard let url = components?.url else {
+        guard let url = components.url else {
             print("Ошибка: неверный URL")
             return nil
         }
+        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
-        request.setValue("695743 KLjJjKd0HAHZefLoKnLVZ4ZfoJSiksS-riusDQ7l-R8", forHTTPHeaderField: "Authorization") //найти свой ключ аккаунта Unsplash
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         return request
     }
     private func parsePhotos(from data: Data) throws -> [Photo] {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
+        decoder.dateDecodingStrategy = .iso8601 // Добавляем стратегию парсинга даты
         
         let photoResults = try decoder.decode([PhotoResult].self, from: data)
         
-        // Конвертируем [PhotoResult] в [Photo]
-        return photoResults.map { Photo.from(photoResult: $0) }
+        return photoResults.map { photoResult in
+            Photo(
+                id: photoResult.id,
+                size: CGSize(width: photoResult.width, height: photoResult.height),
+                createdAt: photoResult.createdAt, // Теперь это автоматически преобразуется в Date
+                welcomeDescription: photoResult.description,
+                thumbImageURL: photoResult.urls.thumb,
+                largeImageURL: photoResult.urls.full,
+                isLiked: photoResult.likedByUser
+            )
+        }
     }
 }
 
 extension Photo {
     static func from(photoResult: PhotoResult) -> Photo {
-        // 1. Преобразуем дату из String в Date
-        let dateFormatter = ISO8601DateFormatter()
-        
-        // 2. Создаём CGSize из width/height
-        let size = CGSize(width: photoResult.width, height: photoResult.height)
-        
-        
-        let createdAtDate = dateFormatter.date(from: photoResult.createdAt)
+            // Размер фото
+            let size = CGSize(width: photoResult.width, height: photoResult.height)
             
-        return Photo(id: photoResult.id,
-                     size: size,
-                     createdAt: createdAtDate,
-                     welcomeDescription:photoResult.description,
-                     thumbImageURL: photoResult.urls.thumb,
-                     largeImageURL: photoResult.urls.full,
-                     isLiked: photoResult.likedByUser)
-    }
+            return Photo(
+                id: photoResult.id,
+                size: size,
+                createdAt: photoResult.createdAt, // Уже Date, не нужно преобразовывать
+                welcomeDescription: photoResult.description,
+                thumbImageURL: photoResult.urls.thumb,
+                largeImageURL: photoResult.urls.full,
+                isLiked: photoResult.likedByUser
+            )
+        }
 }

@@ -72,27 +72,26 @@ final class AuthViewController: UIViewController {
 }
 extension AuthViewController: WebViewViewControllerDelegate {
     func webViewViewController(_ vc: WebViewViewController, didAuthenticateWithCode code: String) {
-        
         UIBlockingProgressHUD.show()
-        OAuth2Service.shared.fetchOAuthToken(code: code) { result in
+        OAuth2Service.shared.fetchOAuthToken(code: code) { [weak self] result in
             DispatchQueue.main.async {
-            UIBlockingProgressHUD.dismiss()
+                UIBlockingProgressHUD.dismiss()
+                guard let self = self else { return }
+                
                 switch result {
-                case.success(let token):
+                case .success(let token):
                     OAuth2TokenStorage.shared.token = token
-                    self.delegate?.didAuthenticate(self) // Вызываем метод делегата!
+                    // 1. Закрываем WebView
+                    vc.dismiss(animated: true) {
+                        // 2. Уведомляем делегата о успешной аутентификации
+                        self.delegate?.didAuthenticate(self)
+                    }
                 case .failure(let error):
-                    // Обработка ошибки
-                    self.showErrorAlert(message: "Не удалось войти в систему")
-                }
-                // Закрываем WebView после завершения запроса
-                vc.dismiss(animated: true) {
-                    // Всегда сбрасываем флаг блокировки
-                    self.isAuthorizing = false
+                    self.showErrorAlert(message: error.localizedDescription)
                 }
             }
         }
-    }    
+    }
     func webViewViewControllerDidCancel(_ vc: WebViewViewController) {
         dismiss(animated: true) // Закрываем AuthViewController
         self.isAuthorizing = false // сбрасываем флаг

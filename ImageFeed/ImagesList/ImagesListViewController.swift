@@ -23,6 +23,7 @@ final class ImagesListViewController: UIViewController {
     }()
     private let currentDate = Date()
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
+    private let imagesListService = ImagesListService()
     
     // MARK: - Private Methods
     private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
@@ -36,12 +37,17 @@ final class ImagesListViewController: UIViewController {
         let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
         cell.likeButton.setImage(likeImage, for: .normal)
     }
+    private func refreshFeed() {
+        imagesListService.photos = [] // Очищаем текущие фото
+        imagesListService.fetchPhotosNextPage() // Загружаем свежие
+    }
     
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        refreshFeed()
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
