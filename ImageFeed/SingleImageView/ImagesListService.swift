@@ -52,6 +52,7 @@ struct PhotoResult: Codable {
 }
 final class ImagesListService {
     
+    static let shared = ImagesListService()
     static let didChangeNotification = Notification.Name(rawValue: "ImagesListServiceDidChange")
     
     var photos: [Photo] = []

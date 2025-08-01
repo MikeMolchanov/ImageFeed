@@ -35,6 +35,12 @@ final class SingleImageViewController: UIViewController {
             rescaleAndCenterImageInScrollView(image: image)
         }
     }
+    var imageURL: URL? {
+        didSet {
+            guard isViewLoaded, let imageURL = imageURL else { return }
+            loadImage(from: imageURL)
+        }
+    }
     
     // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
@@ -60,10 +66,30 @@ final class SingleImageViewController: UIViewController {
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
-        guard let image else { return }
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        if let image = image {
+            imageView.image = image
+            rescaleAndCenterImageInScrollView(image: image)
+        } else if let imageURL = imageURL {
+            loadImage(from: imageURL)
+        }
+    }
+    private func loadImage(from url: URL) {
+        imageView.kf.indicatorType = .activity
+        imageView.kf.setImage(
+            with: url,
+            placeholder: UIImage(named: "placeholder"),
+            options: [.transition(.fade(0.3))]
+        ) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let value):
+                self.image = value.image // Сохраняем загруженное изображение
+                self.rescaleAndCenterImageInScrollView(image: value.image)
+            case .failure(let error):
+                print("Ошибка загрузки: \(error)")
+                
+            }
+        }
     }
 }
 extension SingleImageViewController: UIScrollViewDelegate {
