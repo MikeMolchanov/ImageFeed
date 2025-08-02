@@ -19,6 +19,7 @@ enum NetworkError: Error {
     case decodingError(Error)
     case unauthorized
     case profileImageNotFound
+    case invalidToken
 }
 
 extension URLSession {

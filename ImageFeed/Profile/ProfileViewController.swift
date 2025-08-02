@@ -187,6 +187,8 @@ final class ProfileViewController: UIViewController {
                     message = "Ошибка авторизации"
                 case .profileImageNotFound:
                     message = "Ошибка аватарки"
+                @unknown default:
+                    message = "Неизвестная ошибка"
                 }
             } else {
                 // Для системных ошибок используем стандартное описание

@@ -7,17 +7,33 @@
 
 import UIKit
 import Kingfisher
+protocol ImagesListCellDelegate: AnyObject {
+    func imageListCellDidTapLike(_ cell: ImagesListCell)
+}
 final class ImagesListCell: UITableViewCell {
+    
+
     
     // MARK: - Static properties
     
     static let reuseIdentifier = "ImagesListCell"
+    var onLikeButtonTapped: (() -> Void)?
+    weak var delegate: ImagesListCellDelegate?
+
+
     
     // MARK: - @IBOutlet properties
     
     @IBOutlet weak var cellImage: UIImageView!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var likeButton: UIButton!
+    @IBAction private func likeButtonTapped(_ sender: UIButton) {
+        onLikeButtonTapped?()
+    }
+    @IBAction private func likeButtonClicked() {
+        delegate?.imageListCellDidTapLike(self)
+    }
+
     
     override func prepareForReuse() {
             super.prepareForReuse()
@@ -41,6 +57,11 @@ final class ImagesListCell: UITableViewCell {
                 }
             }
         }
+    func setIsLiked(_ isLiked: Bool) {
+        let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
+        likeButton.setImage(likeImage, for: .normal)
+    }
+
 }
 extension Date {
     func dateString() -> String {

@@ -114,13 +114,64 @@ extension ImagesListViewController: UITableViewDataSource {
         return photos.count
     }
     
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
         let photo = photos[indexPath.row]
         cell.config(with: photo) { [weak self] in
             self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
+        cell.delegate = self
+
+        
+        cell.onLikeButtonTapped = { [weak self] in
+            guard let self = self else { return }
+            self.imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { result in
+                switch result {
+                case .success:
+                    // Ничего делать не нужно — NotificationCenter обновит UI
+                    break
+                case .failure(let error):
+                    print("Ошибка при смене лайка: \(error.localizedDescription)")
+                }
+            }
+        }
+        
+        
         return cell
     }
 }
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        let photo = photos[indexPath.row]
+
+        UIBlockingProgressHUD.show()
+
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+
+                switch result {
+                case .success:
+                    self.photos = self.imagesListService.photos
+                    cell.setIsLiked(self.photos[indexPath.row].isLiked)
+                case .failure(let error):
+                    print("Ошибка при смене лайка: \(error.localizedDescription)")
+                    let alert = UIAlertController(
+                        title: "Ошибка",
+                        message: "Не удалось поставить лайк. Попробуйте позже.",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "ОК", style: .default))
+                    self.present(alert, animated: true)
+                }
+            }
+        }
+    }
+}
+
 

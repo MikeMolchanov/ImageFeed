@@ -15,6 +15,8 @@ struct Photo {
     let thumbImageURL: String
     let largeImageURL: String
     let isLiked: Bool
+    let fullImageURL: String
+
     
 }
 struct PhotoResult: Codable {
@@ -113,6 +115,61 @@ final class ImagesListService {
         currentTask.resume()
     }
     
+    func changeLike(photoId: String, isLike: Bool, _ completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let token = OAuth2TokenStorage.shared.token else {
+            print("Ошибка: нет токена")
+            completion(.failure(NetworkError.invalidToken))
+            return
+        }
+
+        let method = isLike ? "POST" : "DELETE"
+        guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
+            print("Ошибка: неверный URL для лайка")
+            completion(.failure(NetworkError.invalidRequest))
+            return
+        }
+
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+
+        let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+
+                if let error = error {
+                    completion(.failure(error))
+                    return
+                }
+
+                if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
+                    let photo = self.photos[index]
+                    let newPhoto = Photo(
+                        id: photo.id,
+                        size: photo.size,
+                        createdAt: photo.createdAt,
+                        welcomeDescription: photo.welcomeDescription,
+                        thumbImageURL: photo.thumbImageURL,
+                        largeImageURL: photo.largeImageURL,
+                        isLiked: !photo.isLiked, 
+                        fullImageURL: photo.fullImageURL
+                    )
+
+                    self.photos = self.photos.withReplaced(itemAt: index, newValue: newPhoto)
+
+                    NotificationCenter.default.post(
+                        name: ImagesListService.didChangeNotification,
+                        object: self
+                    )
+                }
+
+                completion(.success(()))
+            }
+        }
+        task.resume()
+    }
+
+    
     private func createRequest(page: Int, perPage: Int, token: String) -> URLRequest? {
         var components = URLComponents(string: "https://api.unsplash.com/photos")!
         components.queryItems = [
@@ -145,25 +202,17 @@ final class ImagesListService {
                 welcomeDescription: photoResult.description,
                 thumbImageURL: photoResult.urls.thumb,
                 largeImageURL: photoResult.urls.full,
-                isLiked: photoResult.likedByUser
+                isLiked: photoResult.likedByUser, 
+                fullImageURL: photoResult.urls.full
             )
         }
     }
 }
-
-extension Photo {
-    static func from(photoResult: PhotoResult) -> Photo {
-            // Размер фото
-            let size = CGSize(width: photoResult.width, height: photoResult.height)
-            
-            return Photo(
-                id: photoResult.id,
-                size: size,
-                createdAt: photoResult.createdAt, // Уже Date, не нужно преобразовывать
-                welcomeDescription: photoResult.description,
-                thumbImageURL: photoResult.urls.thumb,
-                largeImageURL: photoResult.urls.full,
-                isLiked: photoResult.likedByUser
-            )
-        }
+extension Array {
+    func withReplaced(itemAt index: Int, newValue: Element) -> [Element] {
+        var copy = self
+        copy[index] = newValue
+        return copy
+    }
 }
+
