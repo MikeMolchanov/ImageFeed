@@ -12,15 +12,11 @@ protocol ImagesListCellDelegate: AnyObject {
 }
 final class ImagesListCell: UITableViewCell {
     
-
-    
     // MARK: - Static properties
     
     static let reuseIdentifier = "ImagesListCell"
     var onLikeButtonTapped: (() -> Void)?
     weak var delegate: ImagesListCellDelegate?
-
-
     
     // MARK: - @IBOutlet properties
     
@@ -34,12 +30,9 @@ final class ImagesListCell: UITableViewCell {
         delegate?.imageListCellDidTapLike(self)
     }
     
-    
-
-    
     override func prepareForReuse() {
-            super.prepareForReuse()
-            cellImage.kf.cancelDownloadTask()
+        super.prepareForReuse()
+        cellImage.kf.cancelDownloadTask()
     }
     func config(with photo: Photo, completion: @escaping () -> Void) {
         dateLabel.text = photo.createdAt?.dateString()
@@ -69,12 +62,11 @@ final class ImagesListCell: UITableViewCell {
     }
     override func awakeFromNib() {
         super.awakeFromNib()
-
+        
         cellImage.translatesAutoresizingMaskIntoConstraints = false
         cellImage.contentMode = .scaleAspectFill
         cellImage.clipsToBounds = true
     }
-
 }
 extension Date {
     func dateString() -> String {

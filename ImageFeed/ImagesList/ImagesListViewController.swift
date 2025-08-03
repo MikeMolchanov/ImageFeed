@@ -33,7 +33,6 @@ final class ImagesListViewController: UIViewController {
             photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
             for: .normal
         )
-        
         // Загрузка изображения из сети
         if let url = URL(string: photo.thumbImageURL) {
             cell.cellImage.kf.setImage(
@@ -88,8 +87,6 @@ final class ImagesListViewController: UIViewController {
             viewController.imageURL = URL(string: photo.largeImageURL) // Передаем URL вместо UIImage
         }
     }
-    
-    
 }
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -114,7 +111,6 @@ extension ImagesListViewController: UITableViewDataSource {
         return photos.count
     }
     
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
         let photo = photos[indexPath.row]
@@ -122,8 +118,6 @@ extension ImagesListViewController: UITableViewDataSource {
             self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
         cell.delegate = self
-
-        
         cell.onLikeButtonTapped = { [weak self] in
             guard let self = self else { return }
             self.imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { result in
@@ -136,8 +130,6 @@ extension ImagesListViewController: UITableViewDataSource {
                 }
             }
         }
-        
-        
         return cell
     }
 }
@@ -146,15 +138,15 @@ extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
         let photo = photos[indexPath.row]
-
+        
         UIBlockingProgressHUD.show()
-
+        
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self = self else { return }
-
+            
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
-
+                
                 switch result {
                 case .success:
                     self.photos = self.imagesListService.photos

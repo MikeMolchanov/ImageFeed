@@ -57,7 +57,7 @@ final class SplashViewController: UIViewController {
         guard let authVC = storyboard.instantiateViewController(withIdentifier: "AuthViewController") as? AuthViewController else {
             fatalError("Failed to instantiate AuthViewController from storyboard")
         }
-            
+        
         authVC.delegate = self
         authVC.modalPresentationStyle = .fullScreen
         
@@ -72,11 +72,10 @@ final class SplashViewController: UIViewController {
             
             switch result {
             case .success:
-                self.switchToTabBarController() // ✅ Только здесь!
-                // 2. Запускаем загрузку аватарки (НЕ ждем завершения!)
+                self.switchToTabBarController()
+                // Запускаем загрузку аватарки
                 if let username = profileService.profile?.username {
                     self.profileImageService.fetchProfileImageURL(username: username) { _ in
-                        // Результат не важен на этом этапе
                     }
                 }
                 
@@ -99,7 +98,7 @@ final class SplashViewController: UIViewController {
         window.rootViewController = tabBarController
     }
     private func showErrorAlert(error: Error, completion: (() -> Void)? = nil) {
-        // 1. Формируем сообщение
+        
         let message: String
         if let nsError = error as? NSError {
             message = "Ошибка \(nsError.code): \(nsError.localizedDescription)"
@@ -107,13 +106,11 @@ final class SplashViewController: UIViewController {
             message = error.localizedDescription
         }
         
-        // 2. Создаём алерт
         let alert = UIAlertController(
             title: "Ошибка загрузки",
             message: "Не удалось загрузить профиль: \(message)",
             preferredStyle: .alert
         )
-        // 3. Добавляем действия
         alert.addAction(UIAlertAction(title: "Повторить", style: .default) { _ in
             completion?()
         })
@@ -122,7 +119,6 @@ final class SplashViewController: UIViewController {
             // Возврат на экран авторизации
             self.navigationController?.popToRootViewController(animated: true)
         })
-        // 4. Показываем пользователю
         present(alert, animated: true, completion: nil)
     }
 }

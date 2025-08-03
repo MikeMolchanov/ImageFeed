@@ -47,10 +47,6 @@ final class SingleImageViewController: UIViewController {
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
-
-    
-    
-
     
     // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
@@ -80,7 +76,7 @@ final class SingleImageViewController: UIViewController {
             placeholderImageView.widthAnchor.constraint(equalToConstant: 83),
             placeholderImageView.heightAnchor.constraint(equalToConstant: 75)
         ])
-
+        
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
@@ -98,7 +94,7 @@ final class SingleImageViewController: UIViewController {
         ) { [weak self] result in
             guard let self = self else { return }
             self.placeholderImageView.isHidden = true // Убираем заглушку
-
+            
             switch result {
             case .success(let value):
                 self.image = value.image
@@ -107,7 +103,7 @@ final class SingleImageViewController: UIViewController {
                 print("Ошибка загрузки: \(error)")
             }
         }
-
+        
     }
 }
 extension SingleImageViewController: UIScrollViewDelegate {

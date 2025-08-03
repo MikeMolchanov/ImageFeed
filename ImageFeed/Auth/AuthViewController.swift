@@ -64,7 +64,7 @@ final class AuthViewController: UIViewController {
     @IBAction func loginButtonTapped(_ sender: UIButton) {
         guard !isAuthorizing else {return} // 2. Проверяем состояние
         isAuthorizing = true // 3. Блокируем повторные нажатия
-    
+        
         // Запуск процесса авторизации
         performSegue(withIdentifier: "ShowWebView", sender: nil)
         

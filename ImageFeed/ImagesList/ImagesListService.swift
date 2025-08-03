@@ -16,8 +16,6 @@ struct Photo {
     let largeImageURL: String
     let isLiked: Bool
     let fullImageURL: String
-
-    
 }
 struct PhotoResult: Codable {
     let id: String
@@ -51,9 +49,6 @@ final class ImagesListService {
     private var lastLoadedPage: Int?
     private var currentTask: URLSessionTask?
     private var nextPage = 1
-    
-    
-    
     
     func reset() {
         photos = []
@@ -121,27 +116,27 @@ final class ImagesListService {
             completion(.failure(NetworkError.invalidToken))
             return
         }
-
+        
         let method = isLike ? "POST" : "DELETE"
         guard let url = URL(string: "https://api.unsplash.com/photos/\(photoId)/like") else {
             print("Ошибка: неверный URL для лайка")
             completion(.failure(NetworkError.invalidRequest))
             return
         }
-
+        
         var request = URLRequest(url: url)
         request.httpMethod = method
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-
+        
         let task = URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 guard let self = self else { return }
-
+                
                 if let error = error {
                     completion(.failure(error))
                     return
                 }
-
+                
                 if let index = self.photos.firstIndex(where: { $0.id == photoId }) {
                     let photo = self.photos[index]
                     let newPhoto = Photo(
@@ -154,21 +149,20 @@ final class ImagesListService {
                         isLiked: !photo.isLiked, 
                         fullImageURL: photo.fullImageURL
                     )
-
+                    
                     self.photos = self.photos.withReplaced(itemAt: index, newValue: newPhoto)
-
+                    
                     NotificationCenter.default.post(
                         name: ImagesListService.didChangeNotification,
                         object: self
                     )
                 }
-
+                
                 completion(.success(()))
             }
         }
         task.resume()
     }
-
     
     private func createRequest(page: Int, perPage: Int, token: String) -> URLRequest? {
         var components = URLComponents(string: "https://api.unsplash.com/photos")!
