@@ -33,33 +33,46 @@ final class ImagesListCell: UITableViewCell {
     @IBAction private func likeButtonClicked() {
         delegate?.imageListCellDidTapLike(self)
     }
+    
+    
 
     
     override func prepareForReuse() {
             super.prepareForReuse()
             cellImage.kf.cancelDownloadTask()
-        }
+    }
     func config(with photo: Photo, completion: @escaping () -> Void) {
-            dateLabel.text = photo.createdAt?.dateString()
-            likeButton.setImage(
-                photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
-                for: .normal
-            )
-            
-            cellImage.kf.indicatorType = .activity
-            if let url = URL(string: photo.thumbImageURL) {
-                cellImage.kf.setImage(
-                    with: url,
-                    placeholder: UIImage(named: "placeholder"),
-                    options: [.transition(.fade(0.3))]
-                ) { _ in
-                    completion()
-                }
+        dateLabel.text = photo.createdAt?.dateString()
+        likeButton.setImage(
+            photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
+            for: .normal
+        )
+        
+        cellImage.kf.indicatorType = .activity
+        // Пока изображение не загружено — показываем заглушку по центру
+        cellImage.contentMode = .center
+        if let url = URL(string: photo.thumbImageURL) {
+            cellImage.kf.setImage(
+                with: url,
+                placeholder: UIImage(named: "Plug"),
+                options: [.transition(.fade(0.3))]
+            ) { _ in
+                // После загрузки фото — переключаем режим обратно
+                self.cellImage.contentMode = .scaleAspectFill
+                completion()
             }
         }
+    }
     func setIsLiked(_ isLiked: Bool) {
         let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
         likeButton.setImage(likeImage, for: .normal)
+    }
+    override func awakeFromNib() {
+        super.awakeFromNib()
+
+        cellImage.translatesAutoresizingMaskIntoConstraints = false
+        cellImage.contentMode = .scaleAspectFill
+        cellImage.clipsToBounds = true
     }
 
 }

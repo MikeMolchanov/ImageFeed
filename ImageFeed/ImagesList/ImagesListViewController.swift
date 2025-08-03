@@ -38,7 +38,7 @@ final class ImagesListViewController: UIViewController {
         if let url = URL(string: photo.thumbImageURL) {
             cell.cellImage.kf.setImage(
                 with: url,
-                placeholder: UIImage(named: "placeholder"),
+                placeholder: UIImage(named: "Plug"),
                 options: [.transition(.fade(0.3))]
             )
         }

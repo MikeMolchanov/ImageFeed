@@ -80,6 +80,8 @@ final class ProfileViewController: UIViewController {
         view.addSubview(logoutButton)
         logoutButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24).isActive = true
         logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor).isActive = true
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+
         
         guard let token = OAuth2TokenStorage.shared.token else {
             showError(NetworkError.unauthorized)
@@ -98,7 +100,12 @@ final class ProfileViewController: UIViewController {
             }
         updateAvatar()
     }
+
     
+    @objc private func didTapLogoutButton() {
+        ProfileLogoutService.shared.logout()
+    }
+
     private func loadProfile(with token: String) {
         profileService.fetchProfile(token) { [weak self] result in
             DispatchQueue.main.async {

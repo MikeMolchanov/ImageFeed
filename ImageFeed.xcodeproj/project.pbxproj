@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		870C652C2E3F5C2000F45238 /* ProfileLogoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870C652B2E3F5C2000F45238 /* ProfileLogoutService.swift */; };
 		8751009B2D07603200CCFBDF /* SingleImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8751009A2D07603200CCFBDF /* SingleImageViewController.swift */; };
 		87B619F72CF8FEA5004D102B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B619F62CF8FEA5004D102B /* AppDelegate.swift */; };
 		87B619F92CF8FEA5004D102B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B619F82CF8FEA5004D102B /* SceneDelegate.swift */; };
@@ -35,6 +36,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		870C652B2E3F5C2000F45238 /* ProfileLogoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileLogoutService.swift; sourceTree = "<group>"; };
 		8751009A2D07603200CCFBDF /* SingleImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageViewController.swift; sourceTree = "<group>"; };
 		87B619F32CF8FEA5004D102B /* ImageFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B619F62CF8FEA5004D102B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -80,7 +82,6 @@
 			isa = PBXGroup;
 			children = (
 				8751009A2D07603200CCFBDF /* SingleImageViewController.swift */,
-				87D005202E2572E70082B134 /* ImagesListService.swift */,
 			);
 			path = SingleImageView;
 			sourceTree = "<group>";
@@ -137,6 +138,7 @@
 			children = (
 				87DA948F2CFF89B0003C2561 /* ImagesListCell.swift */,
 				87B619FA2CF8FEA5004D102B /* ImagesListViewController.swift */,
+				87D005202E2572E70082B134 /* ImagesListService.swift */,
 			);
 			path = ImagesList;
 			sourceTree = "<group>";
@@ -147,6 +149,7 @@
 				87DA94922D047411003C2561 /* ProfileViewController.swift */,
 				87E757E22DECD73800DDC28A /* ProfileService.swift */,
 				87E757E42DFD887800DDC28A /* ProfileImageService.swift */,
+				870C652B2E3F5C2000F45238 /* ProfileLogoutService.swift */,
 			);
 			path = Profile;
 			sourceTree = "<group>";
@@ -278,6 +281,7 @@
 				87F3F2052D32B436008D001D /* Constants.swift in Sources */,
 				8751009B2D07603200CCFBDF /* SingleImageViewController.swift in Sources */,
 				87E757E52DFD887800DDC28A /* ProfileImageService.swift in Sources */,
+				870C652C2E3F5C2000F45238 /* ProfileLogoutService.swift in Sources */,
 				87E8921E2DB967EA00C8C31B /* URLSession+data.swift in Sources */,
 				87F3F20A2D3D188F008D001D /* WebViewViewController.swift in Sources */,
 				87D005212E2572E70082B134 /* ImagesListService.swift in Sources */,
