@@ -7,6 +7,7 @@
 
 import UIKit
 import Kingfisher
+import WebKit
 
 final class ProfileViewController: UIViewController {
     
@@ -103,8 +104,41 @@ final class ProfileViewController: UIViewController {
 
     
     @objc private func didTapLogoutButton() {
-        ProfileLogoutService.shared.logout()
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+        
+        let cancelAction = UIAlertAction(title: "Нет", style: .cancel, handler: nil)
+        
+        let confirmAction = UIAlertAction(title: "Да", style: .default) { _ in
+            // Удаляем токен
+            OAuth2TokenStorage.shared.token = nil
+            
+            // Очищаем куки
+            HTTPCookieStorage.shared.removeCookies(since: .distantPast)
+            WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+                records.forEach {
+                    WKWebsiteDataStore.default().removeData(ofTypes: $0.dataTypes, for: [$0], completionHandler: {})
+                }
+            }
+            
+            // Вызываем logout и сброс сервисов
+            ProfileLogoutService.shared.logout()
+            
+            // Переход на сплэш
+            if let window = UIApplication.shared.windows.first {
+                window.rootViewController = SplashViewController()
+            }
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        
+        present(alert, animated: true)
     }
+
 
     private func loadProfile(with token: String) {
         profileService.fetchProfile(token) { [weak self] result in
