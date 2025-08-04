@@ -36,8 +36,8 @@ final class ProfileService {
     private var currentTask: URLSessionTask?
     private var currentToken: String?
     private var currentCompletion: ((Result<Profile, Error>) -> Void)?
-    private(set) var profile: Profile?
-    
+    var profile: Profile?
+
     func makeProfileRequest(token: String) -> URLRequest? {
         guard let token = OAuth2TokenStorage.shared.token else {
             assertionFailure("Failed to get OAuth token")
@@ -125,7 +125,6 @@ final class ProfileService {
         } else {
             fullName = "No Name"
         }
-        
         // Создаем логин
         let loginName = "@\(profileResult.username)"
         

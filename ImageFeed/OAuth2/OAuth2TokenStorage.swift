@@ -35,15 +35,4 @@ final class OAuth2TokenStorage {
     func clearToken() {
         token = nil
     }
-//    // 2. Ключ для сохранения в UserDefaults
-//    private let tokenKey = "tokenKey"
-//    // 3. Вычислимое свойство для работы с токеном
-//    var token: String? {
-//        get {
-//            return UserDefaults.standard.string(forKey: tokenKey)
-//        }
-//        set {
-//            UserDefaults.standard.set(newValue, forKey: tokenKey)
-//        }
-//    }
 }

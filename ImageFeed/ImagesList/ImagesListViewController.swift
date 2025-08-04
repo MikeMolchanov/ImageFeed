@@ -13,7 +13,6 @@ final class ImagesListViewController: UIViewController {
     @IBOutlet private var tableView: UITableView!
     
     // MARK: - Private Properties
-    private let photosName: [String] = Array(0..<20).map{ "\($0)" }
     
     private lazy var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -23,18 +22,40 @@ final class ImagesListViewController: UIViewController {
     }()
     private let currentDate = Date()
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
+    private let imagesListService = ImagesListService()
     
     // MARK: - Private Methods
-    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-        guard let image = UIImage(named: photosName[indexPath.row])
-        else {
-            return
+//    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
+//        let photo = photos[indexPath.row]
+//        cell.dateLabel.text = photo.createdAt?.dateString()
+//        cell.likeButton.setImage(
+//            photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
+//            for: .normal
+//        )
+//        // Загрузка изображения из сети
+//        if let url = URL(string: photo.thumbImageURL) {
+//            cell.cellImage.kf.setImage(
+//                with: url,
+//                placeholder: UIImage(named: "Plug"),
+//                options: [.transition(.fade(0.3))]
+//            )
+//        }
+//    }
+    private func refreshFeed() {
+        imagesListService.photos = [] // Очищаем текущие фото
+        imagesListService.fetchPhotosNextPage() // Загружаем свежие
+    }
+    private func setupObserver() {
+        NotificationCenter.default.addObserver(
+            forName: ImagesListService.didChangeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            self?.updateTableViewAnimated()
         }
-        cell.cellImage.image = image
-        cell.dateLabel.text = dateFormatter.string(from: currentDate)
-        let isLiked = indexPath.row % 2 == 0
-        let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
-        cell.likeButton.setImage(likeImage, for: .normal)
+    }
+    private func updateTableViewAnimated() {
+        tableView.reloadData()
     }
     
     // MARK: - View Life Cycles
@@ -42,60 +63,117 @@ final class ImagesListViewController: UIViewController {
         super.viewDidLoad()
         
         tableView.contentInset = UIEdgeInsets(top: 12, left: 0, bottom: 12, right: 0)
+        setupObserver()
+        refreshFeed()
     }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == showSingleImageSegueIdentifier {
             guard
                 let viewController = segue.destination as? SingleImageViewController,
                 let indexPath = sender as? IndexPath
-            else {
-                assertionFailure("Invalid segue destination")
-                return
-            }
+            else { return }
             
-            let image = UIImage(named: photosName[indexPath.row])
-            
-            viewController.image = image
-            
-        } else {
-            super.prepare(for: segue, sender: sender)
+            let photo = imagesListService.photos[indexPath.row]
+            viewController.imageURL = URL(string: photo.largeImageURL)
+
         }
     }
-    
-    
 }
 extension ImagesListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         performSegue(withIdentifier: showSingleImageSegueIdentifier, sender: indexPath)
     }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        guard let image = UIImage(named: photosName[indexPath.row]) else {
-            return 0
-        }
-        
+        let photo = imagesListService.photos[indexPath.row]
         let imageInsets = UIEdgeInsets(top: 4, left: 16, bottom: 4, right: 16)
         let imageViewWidth = tableView.bounds.width - imageInsets.left - imageInsets.right
-        let imageWidth = image.size.width
+        let imageWidth = photo.size.width
         let scale = imageViewWidth / imageWidth
-        let cellHeight = image.size.height * scale + imageInsets.top + imageInsets.bottom
-        return cellHeight
+        return photo.size.height * scale + imageInsets.top + imageInsets.bottom
+    }
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        if indexPath.row == imagesListService.photos.count - 1 {
+ // последний элемент
+            imagesListService.fetchPhotosNextPage()
+        }
     }
 }
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return photosName.count
+        return imagesListService.photos.count
+
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) // 1
-        
-        guard let imageListCell = cell as? ImagesListCell else { // 2
-            return UITableViewCell()
+        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
+        var photo = imagesListService.photos[indexPath.row]
+        cell.config(with: photo) { [weak self] in
+            self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
-        
-        configCell(for: imageListCell, with: indexPath) // 3
-        return imageListCell // 4
+        cell.delegate = self
+        cell.onLikeButtonTapped = { [weak self] in
+            guard let self = self else { return }
+            var photo = self.imagesListService.photos[indexPath.row]
+            let newIsLiked = !photo.isLiked
+
+            UIBlockingProgressHUD.show()
+
+            self.imagesListService.changeLike(photoId: photo.id, isLike: newIsLiked) { result in
+                DispatchQueue.main.async {
+                    UIBlockingProgressHUD.dismiss()
+
+                    switch result {
+                    case .success:
+                        photo.isLiked = newIsLiked
+                        self.imagesListService.photos[indexPath.row] = photo
+                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    case .failure(let error):
+                        print("Ошибка при смене лайка: \(error.localizedDescription)")
+                        let alert = UIAlertController(
+                            title: "Ошибка",
+                            message: "Не удалось поставить лайк. Попробуйте позже.",
+                            preferredStyle: .alert
+                        )
+                        alert.addAction(UIAlertAction(title: "ОК", style: .default))
+                        self.present(alert, animated: true)
+                    }
+                }
+            }
+        }
+        return cell
     }
-    
-    
 }
+
+extension ImagesListViewController: ImagesListCellDelegate {
+    func imageListCellDidTapLike(_ cell: ImagesListCell) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+
+        let photo = imagesListService.photos[indexPath.row]
+
+        UIBlockingProgressHUD.show()
+
+        imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                UIBlockingProgressHUD.dismiss()
+
+                switch result {
+                case .success:
+                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                case .failure(let error):
+                    print("Ошибка при смене лайка: \(error.localizedDescription)")
+                    let alert = UIAlertController(
+                        title: "Ошибка",
+                        message: "Не удалось поставить лайк. Попробуйте позже.",
+                        preferredStyle: .alert
+                    )
+                    alert.addAction(UIAlertAction(title: "ОК", style: .default))
+                    self.present(alert, animated: true)
+                }
+            }
+        }
+    }
+}
+
+

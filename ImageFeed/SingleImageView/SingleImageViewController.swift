@@ -35,6 +35,18 @@ final class SingleImageViewController: UIViewController {
             rescaleAndCenterImageInScrollView(image: image)
         }
     }
+    var imageURL: URL? {
+        didSet {
+            guard isViewLoaded, let imageURL = imageURL else { return }
+            loadImage(from: imageURL)
+        }
+    }
+    private let placeholderImageView: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "Plug"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        return imageView
+    }()
     
     // MARK: - Private Methods
     private func rescaleAndCenterImageInScrollView(image: UIImage) {
@@ -57,13 +69,41 @@ final class SingleImageViewController: UIViewController {
     // MARK: - View Life Cycles
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.addSubview(placeholderImageView)
+        NSLayoutConstraint.activate([
+            placeholderImageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            placeholderImageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            placeholderImageView.widthAnchor.constraint(equalToConstant: 83),
+            placeholderImageView.heightAnchor.constraint(equalToConstant: 75)
+        ])
+        
         scrollView.minimumZoomScale = 0.1
         scrollView.maximumZoomScale = 1.25
         
-        guard let image else { return }
-        imageView.image = image
-        imageView.frame.size = image.size
-        rescaleAndCenterImageInScrollView(image: image)
+        if let image = image {
+            imageView.image = image
+            rescaleAndCenterImageInScrollView(image: image)
+        } else if let imageURL = imageURL {
+            loadImage(from: imageURL)
+        }
+    }
+    private func loadImage(from url: URL) {
+        imageView.kf.setImage(
+            with: url,
+            options: [.transition(.fade(0.3))]
+        ) { [weak self] result in
+            guard let self = self else { return }
+            self.placeholderImageView.isHidden = true // Убираем заглушку
+            
+            switch result {
+            case .success(let value):
+                self.image = value.image
+                self.rescaleAndCenterImageInScrollView(image: value.image)
+            case .failure(let error):
+                print("Ошибка загрузки: \(error)")
+            }
+        }
+        
     }
 }
 extension SingleImageViewController: UIScrollViewDelegate {

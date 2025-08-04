@@ -7,6 +7,7 @@
 
 import UIKit
 import Kingfisher
+import WebKit
 
 final class ProfileViewController: UIViewController {
     
@@ -80,6 +81,8 @@ final class ProfileViewController: UIViewController {
         view.addSubview(logoutButton)
         logoutButton.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24).isActive = true
         logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor).isActive = true
+        logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
+        
         
         guard let token = OAuth2TokenStorage.shared.token else {
             showError(NetworkError.unauthorized)
@@ -97,6 +100,41 @@ final class ProfileViewController: UIViewController {
                 self.updateAvatar()
             }
         updateAvatar()
+    }
+    
+    
+    @objc private func didTapLogoutButton() {
+        let alert = UIAlertController(
+            title: "Пока, пока!",
+            message: "Уверены, что хотите выйти?",
+            preferredStyle: .alert
+        )
+        
+        let cancelAction = UIAlertAction(title: "Нет", style: .cancel, handler: nil)
+        
+        let confirmAction = UIAlertAction(title: "Да", style: .default) { _ in
+            // Удаляем токен
+            OAuth2TokenStorage.shared.token = nil
+            
+            // Очищаем куки
+            HTTPCookieStorage.shared.removeCookies(since: .distantPast)
+            WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes()) { records in
+                records.forEach {
+                    WKWebsiteDataStore.default().removeData(ofTypes: $0.dataTypes, for: [$0], completionHandler: {})
+                }
+            }
+            // Вызываем logout и сброс сервисов
+            ProfileLogoutService.shared.logout()
+            // Переход на сплэш
+            if let window = UIApplication.shared.windows.first {
+                window.rootViewController = SplashViewController()
+            }
+        }
+        
+        alert.addAction(cancelAction)
+        alert.addAction(confirmAction)
+        
+        present(alert, animated: true)
     }
     
     private func loadProfile(with token: String) {
@@ -147,7 +185,7 @@ final class ProfileViewController: UIViewController {
         }
     }
     private func setupViews() {
-            [avatarImageView, nameLabel, loginNameLabel, descriptionLabel, logoutButton].forEach {
+        [avatarImageView, nameLabel, loginNameLabel, descriptionLabel, logoutButton].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
@@ -159,52 +197,54 @@ final class ProfileViewController: UIViewController {
         descriptionLabel.text = profile.bio
     }
     private func showError(_ error: Error) {
-            // Создаём сообщение об ошибке
-            let message: String
-            
-            // Проверяем, является ли ошибка нашим кастомным типом
-            if let networkError = error as? NetworkError {
-                switch networkError {
-                case .invalidRequest:
-                    message = "Некорректный запрос"
-                case .requestInProgress:
-                    message = "Запрос уже выполняется"
-                case .requestCancelled:
-                    message = "Запрос отменён"
-                case .httpStatusCode(let code):
-                    message = "Ошибка сервера: \(code)"
-                case .noData:
-                    message = "Нет данных для отображения"
-                case .decodingError:
-                    message = "Ошибка обработки данных"
-                case .urlRequestError(_):
-                    message = "Ошибка запроса"
-                case .urlSessionError:
-                    message = "Ошибка задачи"
-                case .invalidResponse:
-                    message = "Ошибка ответа"
-                case .unauthorized:
-                    message = "Ошибка авторизации"
-                case .profileImageNotFound:
-                    message = "Ошибка аватарки"
-                }
-            } else {
-                // Для системных ошибок используем стандартное описание
-                message = error.localizedDescription
+        // Создаём сообщение об ошибке
+        let message: String
+        
+        // Проверяем, является ли ошибка нашим кастомным типом
+        if let networkError = error as? NetworkError {
+            switch networkError {
+            case .invalidRequest:
+                message = "Некорректный запрос"
+            case .requestInProgress:
+                message = "Запрос уже выполняется"
+            case .requestCancelled:
+                message = "Запрос отменён"
+            case .httpStatusCode(let code):
+                message = "Ошибка сервера: \(code)"
+            case .noData:
+                message = "Нет данных для отображения"
+            case .decodingError:
+                message = "Ошибка обработки данных"
+            case .urlRequestError(_):
+                message = "Ошибка запроса"
+            case .urlSessionError:
+                message = "Ошибка задачи"
+            case .invalidResponse:
+                message = "Ошибка ответа"
+            case .unauthorized:
+                message = "Ошибка авторизации"
+            case .profileImageNotFound:
+                message = "Ошибка аватарки"
+            @unknown default:
+                message = "Неизвестная ошибка"
             }
-            
-            let alert = UIAlertController(
-                title: "Ошибка",
-                message: message,
-                preferredStyle: .alert
-            )
-            
-            alert.addAction(UIAlertAction(
-                title: "OK",
-                style: .default,
-                handler: nil
-            ))
-            
-            present(alert, animated: true, completion: nil)
+        } else {
+            // Для системных ошибок используем стандартное описание
+            message = error.localizedDescription
         }
+        
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: message,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(
+            title: "OK",
+            style: .default,
+            handler: nil
+        ))
+        
+        present(alert, animated: true, completion: nil)
+    }
 }
