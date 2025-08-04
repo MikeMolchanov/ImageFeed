@@ -33,14 +33,13 @@ final class ImagesListCell: UITableViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         cellImage.kf.cancelDownloadTask()
+        cellImage.image = nil
+        cellImage.contentMode = .center
+        likeButton.setImage(nil, for: .normal)
     }
     func config(with photo: Photo, completion: @escaping () -> Void) {
         dateLabel.text = photo.createdAt?.dateString()
-        likeButton.setImage(
-            photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
-            for: .normal
-        )
-        
+        setIsLiked(photo.isLiked)
         cellImage.kf.indicatorType = .activity
         // Пока изображение не загружено — показываем заглушку по центру
         cellImage.contentMode = .center
