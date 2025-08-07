@@ -41,6 +41,7 @@ final class ImagesListViewController: UIViewController {
 //            )
 //        }
 //    }
+    
     private func refreshFeed() {
         imagesListService.photos = [] // Очищаем текущие фото
         imagesListService.fetchPhotosNextPage() // Загружаем свежие
