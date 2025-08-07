@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		870C652C2E3F5C2000F45238 /* ProfileLogoutService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 870C652B2E3F5C2000F45238 /* ProfileLogoutService.swift */; };
 		8751009B2D07603200CCFBDF /* SingleImageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8751009A2D07603200CCFBDF /* SingleImageViewController.swift */; };
+		87B40E3B2E450435001B5CC1 /* ImageFeedUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B40E3A2E450435001B5CC1 /* ImageFeedUITests.swift */; };
 		87B619F72CF8FEA5004D102B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B619F62CF8FEA5004D102B /* AppDelegate.swift */; };
 		87B619F92CF8FEA5004D102B /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B619F82CF8FEA5004D102B /* SceneDelegate.swift */; };
 		87B619FB2CF8FEA5004D102B /* ImagesListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B619FA2CF8FEA5004D102B /* ImagesListViewController.swift */; };
@@ -53,6 +54,7 @@
 /* Begin PBXFileReference section */
 		870C652B2E3F5C2000F45238 /* ProfileLogoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileLogoutService.swift; sourceTree = "<group>"; };
 		8751009A2D07603200CCFBDF /* SingleImageViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SingleImageViewController.swift; sourceTree = "<group>"; };
+		87B40E3A2E450435001B5CC1 /* ImageFeedUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFeedUITests.swift; sourceTree = "<group>"; };
 		87B619F32CF8FEA5004D102B /* ImageFeed.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageFeed.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		87B619F62CF8FEA5004D102B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		87B619F82CF8FEA5004D102B /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 			children = (
 				87D48F1F2E43E0280036ACE2 /* WebViewTests.swift */,
 				87D48F262E43E6AC0036ACE2 /* WebViewTestsSpies.swift */,
+				87B40E3A2E450435001B5CC1 /* ImageFeedUITests.swift */,
 			);
 			path = ImageFeedTests;
 			sourceTree = "<group>";
@@ -373,6 +376,7 @@
 			files = (
 				87D48F272E43E6AC0036ACE2 /* WebViewTestsSpies.swift in Sources */,
 				87D48F202E43E0280036ACE2 /* WebViewTests.swift in Sources */,
+				87B40E3B2E450435001B5CC1 /* ImageFeedUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
