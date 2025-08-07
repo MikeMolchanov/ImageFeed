@@ -26,7 +26,6 @@ final class ProfilePresenter: ProfilePresenterProtocol {
         }
     }
 
-
     func didTapLogout() {
         view?.showLogoutConfirmation()
     }

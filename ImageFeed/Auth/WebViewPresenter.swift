@@ -13,7 +13,6 @@ public protocol WebViewPresenterProtocol {
     func code(from url: URL) -> String?
 }
 
-
 final class WebViewPresenter: WebViewPresenterProtocol {
     weak var view: WebViewViewControllerProtocol?
     
@@ -22,16 +21,16 @@ final class WebViewPresenter: WebViewPresenterProtocol {
     init(authHelper: AuthHelperProtocol) {
         self.authHelper = authHelper
     }
-
+    
     func viewDidLoad() {
         guard let request = authHelper.authRequest() else {
             return
         }
-
+        
         view?.load(request: request)
         didUpdateProgressValue(0)
     }
-
+    
     func didUpdateProgressValue(_ newValue: Double) {
         let newProgressValue = Float(newValue)
         view?.setProgressValue(newProgressValue)
@@ -44,6 +43,6 @@ final class WebViewPresenter: WebViewPresenterProtocol {
         abs(value - 1.0) <= 0.0001
     }
     func code(from url: URL) -> String? {
-            authHelper.code(from: url)
-        }
+        authHelper.code(from: url)
+    }
 }

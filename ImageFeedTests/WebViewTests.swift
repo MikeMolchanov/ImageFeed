@@ -24,7 +24,7 @@ final class ImageFeedTests: XCTestCase {
         // then
         XCTAssertTrue(presenter.viewDidLoadCalled, "viewDidLoad не был вызван у презентера")
     }
-
+    
     func testPresenterCallsLoadRequest() {
         // given
         let viewController = WebViewViewControllerSpy()
@@ -32,10 +32,10 @@ final class ImageFeedTests: XCTestCase {
         let presenter = WebViewPresenter(authHelper: authHelper)
         presenter.view = viewController
         viewController.presenter = presenter
-
+        
         // when
         presenter.viewDidLoad()
-
+        
         // then
         XCTAssertTrue(viewController.loadRequestCalled, "Метод load(request:) не был вызван")
         XCTAssertNotNil(viewController.lastRequest, "load(request:) вызван с пустым запросом")
@@ -46,23 +46,23 @@ final class ImageFeedTests: XCTestCase {
         let authHelper = AuthHelper()
         let presenter = WebViewPresenter(authHelper: authHelper)
         let progress: Float = 0.6
-
+        
         // when
         let shouldHideProgress = presenter.shouldHideProgress(for: progress)
-
+        
         // then
         XCTAssertFalse(shouldHideProgress, "Прогресс меньше 1 должен быть видимым")
     }
-
+    
     func testProgressHiddenWhenOne() {
         // given
         let authHelper = AuthHelper()
         let presenter = WebViewPresenter(authHelper: authHelper)
         let progress: Float = 1.0
-
+        
         // when
         let shouldHideProgress = presenter.shouldHideProgress(for: progress)
-
+        
         // then
         XCTAssertTrue(shouldHideProgress, "Прогресс, равный 1, должен быть скрыт")
     }
@@ -72,17 +72,13 @@ final class ImageFeedTests: XCTestCase {
         var urlComponents = URLComponents(string: "https://unsplash.com/oauth/authorize/native")!
         urlComponents.queryItems = [ URLQueryItem(name: "code", value: "test code") ]
         let url = urlComponents.url!
-
+        
         let authHelper = AuthHelper()
-
+        
         // when
         let code = authHelper.code(from: url)
-
+        
         // then
         XCTAssertEqual(code, "test code")
     }
-    
-    
-
-
 }

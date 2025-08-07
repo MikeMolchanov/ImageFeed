@@ -9,7 +9,6 @@ import UIKit
 import Kingfisher
 import WebKit
 
-// ProfileViewControllerProtocol.swift
 protocol ProfileViewControllerProtocol: AnyObject {
     func updateProfileDetails(name: String, loginName: String, bio: String)
     func updateAvatar(url: URL)
@@ -17,13 +16,11 @@ protocol ProfileViewControllerProtocol: AnyObject {
     func showError(_ error: Error)
 }
 
-// ProfilePresenterProtocol.swift
 protocol ProfilePresenterProtocol {
     var view: ProfileViewControllerProtocol? { get set }
     func viewDidLoad()
     func didTapLogout()
 }
-
 
 final class ProfileViewController: UIViewController {
     
@@ -75,16 +72,12 @@ final class ProfileViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .ypBlack
         setupViews()
-        presenter?.viewDidLoad() // ВСЯ логика будет у презентера
+        presenter?.viewDidLoad() 
     }
-
-    
-
     
     @objc private func didTapLogoutButton() {
         presenter?.didTapLogout()
     }
-
     
     deinit {
         if let observer = profileImageServiceObserver {
@@ -96,33 +89,32 @@ final class ProfileViewController: UIViewController {
             $0.translatesAutoresizingMaskIntoConstraints = false
             view.addSubview($0)
         }
-
+        
         NSLayoutConstraint.activate([
             avatarImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 32),
             avatarImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             avatarImageView.widthAnchor.constraint(equalToConstant: 70),
             avatarImageView.heightAnchor.constraint(equalToConstant: 70),
-
+            
             nameLabel.topAnchor.constraint(equalTo: avatarImageView.bottomAnchor, constant: 8),
             nameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             nameLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
+            
             loginNameLabel.topAnchor.constraint(equalTo: nameLabel.bottomAnchor, constant: 8),
             loginNameLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-
+            
             descriptionLabel.topAnchor.constraint(equalTo: loginNameLabel.bottomAnchor, constant: 8),
             descriptionLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
             descriptionLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
-
+            
             logoutButton.centerYAnchor.constraint(equalTo: avatarImageView.centerYAnchor),
             logoutButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
             logoutButton.widthAnchor.constraint(equalToConstant: 24),
             logoutButton.heightAnchor.constraint(equalToConstant: 24)
         ])
-
+        
         logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }
-
 }
 
 extension ProfileViewController: ProfileViewControllerProtocol {
@@ -131,11 +123,11 @@ extension ProfileViewController: ProfileViewControllerProtocol {
         loginNameLabel.text = loginName
         descriptionLabel.text = bio
     }
-
+    
     func updateAvatar(url: URL) {
         avatarImageView.kf.setImage(with: url, placeholder: UIImage(named: "Stub"))
     }
-
+    
     func showLogoutConfirmation() {
         let alert = UIAlertController(
             title: "Пока, пока!",
@@ -156,12 +148,12 @@ extension ProfileViewController: ProfileViewControllerProtocol {
                 window.rootViewController = SplashViewController()
             }
         }
-
+        
         alert.addAction(cancel)
         alert.addAction(confirm)
         present(alert, animated: true)
     }
-
+    
     func showError(_ error: Error) {
         let message = (error as? NetworkError)?.localizedDescription ?? error.localizedDescription
         let alert = UIAlertController(title: "Ошибка", message: message, preferredStyle: .alert)

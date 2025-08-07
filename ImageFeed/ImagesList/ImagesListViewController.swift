@@ -25,22 +25,6 @@ final class ImagesListViewController: UIViewController {
     private let imagesListService = ImagesListService()
     
     // MARK: - Private Methods
-//    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-//        let photo = photos[indexPath.row]
-//        cell.dateLabel.text = photo.createdAt?.dateString()
-//        cell.likeButton.setImage(
-//            photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
-//            for: .normal
-//        )
-//        // Загрузка изображения из сети
-//        if let url = URL(string: photo.thumbImageURL) {
-//            cell.cellImage.kf.setImage(
-//                with: url,
-//                placeholder: UIImage(named: "Plug"),
-//                options: [.transition(.fade(0.3))]
-//            )
-//        }
-//    }
     
     private func refreshFeed() {
         imagesListService.photos = [] // Очищаем текущие фото
@@ -76,7 +60,6 @@ final class ImagesListViewController: UIViewController {
             
             let photo = imagesListService.photos[indexPath.row]
             viewController.imageURL = URL(string: photo.largeImageURL)
-
         }
     }
 }
@@ -94,7 +77,7 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == imagesListService.photos.count - 1 {
- // последний элемент
+            // последний элемент
             imagesListService.fetchPhotosNextPage()
         }
     }
@@ -102,7 +85,6 @@ extension ImagesListViewController: UITableViewDelegate {
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return imagesListService.photos.count
-
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -116,13 +98,13 @@ extension ImagesListViewController: UITableViewDataSource {
             guard let self = self else { return }
             var photo = self.imagesListService.photos[indexPath.row]
             let newIsLiked = !photo.isLiked
-
+            
             UIBlockingProgressHUD.show()
-
+            
             self.imagesListService.changeLike(photoId: photo.id, isLike: newIsLiked) { result in
                 DispatchQueue.main.async {
                     UIBlockingProgressHUD.dismiss()
-
+                    
                     switch result {
                     case .success:
                         photo.isLiked = newIsLiked
@@ -148,17 +130,17 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-
+        
         let photo = imagesListService.photos[indexPath.row]
-
+        
         UIBlockingProgressHUD.show()
-
+        
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self = self else { return }
-
+            
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
-
+                
                 switch result {
                 case .success:
                     self.tableView.reloadRows(at: [indexPath], with: .automatic)
