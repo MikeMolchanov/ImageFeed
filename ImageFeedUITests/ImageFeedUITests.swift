@@ -1,8 +1,8 @@
 //
 //  ImageFeedUITests.swift
-//  ImageFeedTests
+//  ImageFeedUITests
 //
-//  Created by Михаил on 07.08.2025.
+//  Created by Михаил on 08.08.2025.
 //
 
 import XCTest
@@ -28,7 +28,7 @@ final class ImageFeedUITests: XCTestCase {
         let loginTextField = webView.descendants(matching: .textField).element
         XCTAssertTrue(loginTextField.waitForExistence(timeout: 5), "Поле логина не найдено")
         loginTextField.tap()
-        loginTextField.typeText(".ru")
+        loginTextField.typeText("misha995@yandex.ru")
         
         webView.swipeUp()
         
@@ -36,7 +36,7 @@ final class ImageFeedUITests: XCTestCase {
         let passwordTextField = webView.descendants(matching: .secureTextField).element
         XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5), "Поле пароля не найдено")
         passwordTextField.tap()
-        passwordTextField.typeText(" ")
+        passwordTextField.typeText("Mazasplash228")
         
         webView.swipeUp()
         
@@ -48,6 +48,29 @@ final class ImageFeedUITests: XCTestCase {
         let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
         XCTAssertTrue(cell.waitForExistence(timeout: 10), "Лента не появилась")
     }
+    
+    func testFeed() throws {
+        // Ждём, пока откроется лента после авторизации
+        sleep(3) // или дольше, если авторизация долгая
+
+        let firstCell = app.cells["feed cell"].firstMatch
+
+        // Ждём появления первой ячейки
+        XCTAssertTrue(firstCell.waitForExistence(timeout: 30), "Первая ячейка ленты не появилась")
+
+
+        // Лайк
+        let likeButton = firstCell.buttons["like button"]
+        XCTAssertTrue(likeButton.exists, "Кнопка лайка не найдена в первой ячейке")
+        likeButton.tap()
+
+        // Скролл
+        app.swipeUp()
+        sleep(1)
+        app.swipeDown()
+    }
+
+
     
     func testProfile() throws {
         // Подождать, пока загружается экран ленты (feed)

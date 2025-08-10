@@ -89,74 +89,59 @@ extension ImagesListViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
-        var photo = imagesListService.photos[indexPath.row]
+        let photo = imagesListService.photos[indexPath.row]
         cell.config(with: photo) { [weak self] in
             self?.tableView.reloadRows(at: [indexPath], with: .automatic)
         }
+
         cell.delegate = self
+        // Если ты используешь onLikeButtonTapped (замыкание) - можно оставить:
         cell.onLikeButtonTapped = { [weak self] in
+            // дублирует делегат, можно оставить или убрать
             guard let self = self else { return }
             var photo = self.imagesListService.photos[indexPath.row]
             let newIsLiked = !photo.isLiked
-            
             UIBlockingProgressHUD.show()
-            
             self.imagesListService.changeLike(photoId: photo.id, isLike: newIsLiked) { result in
                 DispatchQueue.main.async {
                     UIBlockingProgressHUD.dismiss()
-                    
                     switch result {
                     case .success:
                         photo.isLiked = newIsLiked
                         self.imagesListService.photos[indexPath.row] = photo
                         self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     case .failure(let error):
-                        print("Ошибка при смене лайка: \(error.localizedDescription)")
-                        let alert = UIAlertController(
-                            title: "Ошибка",
-                            message: "Не удалось поставить лайк. Попробуйте позже.",
-                            preferredStyle: .alert
-                        )
-                        alert.addAction(UIAlertAction(title: "ОК", style: .default))
-                        self.present(alert, animated: true)
+                        print("Ошибка при изменении лайка: \(error)")
+
+                        // обработка ошибки
                     }
                 }
             }
         }
+
         return cell
     }
 }
-
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-        
         let photo = imagesListService.photos[indexPath.row]
-        
+
         UIBlockingProgressHUD.show()
-        
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self = self else { return }
-            
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
-                
                 switch result {
                 case .success:
                     self.tableView.reloadRows(at: [indexPath], with: .automatic)
                 case .failure(let error):
-                    print("Ошибка при смене лайка: \(error.localizedDescription)")
-                    let alert = UIAlertController(
-                        title: "Ошибка",
-                        message: "Не удалось поставить лайк. Попробуйте позже.",
-                        preferredStyle: .alert
-                    )
-                    alert.addAction(UIAlertAction(title: "ОК", style: .default))
-                    self.present(alert, animated: true)
+                    print("Ошибка при изменении лайка: \(error)")
+
+                    // алерт
                 }
             }
         }
     }
 }
-
 

@@ -47,8 +47,7 @@
                                                     <inset key="imageEdgeInsets" minX="0.0" minY="0.0" maxX="2.2250738585072014e-308" maxY="0.0"/>
                                                     <state key="normal" image="No Active"/>
                                                     <connections>
-                                                        <action selector="likeButtonClicked" destination="EXS-Sm-S2q" eventType="touchUpInside" id="enh-8b-B53"/>
-                                                        <action selector="likeButtonTapped:" destination="EXS-Sm-S2q" eventType="touchUpInside" id="6Di-98-Hoa"/>
+                                                        <action selector="likeButtonTapped:" destination="EXS-Sm-S2q" eventType="touchUpInside" id="cpR-h5-EQt"/>
                                                     </connections>
                                                 </button>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="27 августа 2022" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BZ4-aD-oY3" userLabel="Date Label">
@@ -245,7 +244,7 @@
         <!--Web View View Controller-->
         <scene sceneID="c7c-ue-IC4">
             <objects>
-                <viewController id="3rJ-1e-UO8" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="WebViewViewController" id="3rJ-1e-UO8" customClass="WebViewViewController" customModule="ImageFeed" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="MJg-uw-bs5">
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
