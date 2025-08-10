@@ -118,6 +118,7 @@ extension ImagesListViewController: UITableViewDataSource {
                 }
             }
         }
+        cell.accessibilityIdentifier = "feed cell"
 
         return cell
     }

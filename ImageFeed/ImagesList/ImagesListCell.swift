@@ -74,6 +74,8 @@ final class ImagesListCell: UITableViewCell {
             cellImage.translatesAutoresizingMaskIntoConstraints = false
             cellImage.contentMode = .scaleAspectFill
             cellImage.clipsToBounds = true
+            likeButton.accessibilityIdentifier = "like button"
+
         }
     }
 
