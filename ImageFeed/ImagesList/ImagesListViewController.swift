@@ -23,7 +23,10 @@ final class ImagesListViewController: UIViewController {
     private let currentDate = Date()
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let imagesListService = ImagesListService()
-    
+    private var isUITest: Bool {
+        ProcessInfo.processInfo.arguments.contains("--uitesting")
+    }
+
     // MARK: - Private Methods
     
     private func refreshFeed() {
@@ -77,8 +80,9 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == imagesListService.photos.count - 1 {
-            // последний элемент
-            imagesListService.fetchPhotosNextPage()
+            if !isUITest {
+                imagesListService.fetchPhotosNextPage()
+            }
         }
     }
 }

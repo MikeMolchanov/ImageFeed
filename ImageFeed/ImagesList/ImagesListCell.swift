@@ -58,26 +58,23 @@ final class ImagesListCell: UITableViewCell {
             }
         }
 
-        func setIsLiked(_ isLiked: Bool) {
-            let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
-            likeButton.setImage(likeImage, for: .normal)
-            // идентификаторы для UI тестов
-            likeButton.accessibilityIdentifier = isLiked ? "like button on" : "like button off"
-        }
-
-        override func awakeFromNib() {
-            super.awakeFromNib()
-            // идентификаторы для UI тестов
-            self.accessibilityIdentifier = "feed cell"
-            // Примечание: не ставим тут likeButton.accessibilityIdentifier,
-            // он задаётся в setIsLiked чтобы отражать текущий state.
-            cellImage.translatesAutoresizingMaskIntoConstraints = false
-            cellImage.contentMode = .scaleAspectFill
-            cellImage.clipsToBounds = true
-            likeButton.accessibilityIdentifier = "like button"
-
-        }
+    func setIsLiked(_ isLiked: Bool) {
+        let likeImage = isLiked ? UIImage(named: "Active") : UIImage(named: "No Active")
+        likeButton.setImage(likeImage, for: .normal)
     }
+
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // Идентификаторы для UI тестов
+        self.accessibilityIdentifier = "feed cell"
+        cellImage.translatesAutoresizingMaskIntoConstraints = false
+        cellImage.contentMode = .scaleAspectFill
+        cellImage.clipsToBounds = true
+        
+        // Установить accessibilityIdentifier один раз
+        likeButton.accessibilityIdentifier = "like button"
+    }
+}
 
 extension Date {
     func dateString() -> String {

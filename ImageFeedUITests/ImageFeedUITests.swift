@@ -13,8 +13,10 @@ final class ImageFeedUITests: XCTestCase {
     
     override func setUpWithError() throws {
         continueAfterFailure = false
+        app.launchArguments.append("--uitesting") // 👈 передаём аргумент для приложения
         app.launch()
     }
+
     
     func testAuth() throws {
         // Нажать кнопку авторизации
