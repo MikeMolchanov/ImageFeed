@@ -19,8 +19,10 @@ final class ImageFeedUITests: XCTestCase {
 
     
     func testAuth() throws {
-        // Нажать кнопку авторизации
-        app.buttons["Authenticate"].tap()
+        // Ищем по accessibilityIdentifier
+        let authenticateButton = app.buttons.matching(identifier: "Authenticate").firstMatch
+            XCTAssertTrue(authenticateButton.waitForExistence(timeout: 5), "Кнопка 'Authenticate' не найдена")
+            authenticateButton.tap()
         
         // Найти WebView
         let webView = app.webViews["UnsplashWebView"]
@@ -46,10 +48,10 @@ final class ImageFeedUITests: XCTestCase {
         webView.buttons["Login"].tap()
         
         // Проверка появления первой ячейки в ленте
-        let tablesQuery = app.tables
-        let cell = tablesQuery.children(matching: .cell).element(boundBy: 0)
+        let cell = app.tables.cells.element(boundBy: 0)
         XCTAssertTrue(cell.waitForExistence(timeout: 10), "Лента не появилась")
     }
+
     
     func testFeed() throws {
         // Ждём, пока откроется лента после авторизации
@@ -82,7 +84,7 @@ final class ImageFeedUITests: XCTestCase {
         app.tabBars.buttons.element(boundBy: 1).tap()
         
         // Проверить, что на экране профиля отображаются твои персональные данные
-        XCTAssertTrue(app.staticTexts["Михаил"].exists)       // имя
+        XCTAssertTrue(app.staticTexts["Mikhail Molchanov"].exists)       // имя
         XCTAssertTrue(app.staticTexts["@mikemolchanov"].exists) // логин (
         
         // Нажать на кнопку выхода

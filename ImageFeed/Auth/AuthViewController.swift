@@ -15,6 +15,9 @@ final class AuthViewController: UIViewController {
     
     weak var delegate: AuthViewControllerDelegate?
     
+    @IBOutlet private weak var loginButton: UIButton!
+
+    
     private let showWebViewSegueIdentifier = "ShowWebView"
     private var isAuthorizing = false  // 1. Объявляем флаг состояния
     
@@ -41,6 +44,9 @@ final class AuthViewController: UIViewController {
         OAuth2TokenStorage.shared.clearToken()
         
         configureBackButton()
+        
+        loginButton.accessibilityIdentifier = "Authenticate"
+        loginButton.accessibilityLabel = "Authenticate"
     }
     
     private func switchToMainInterface() {
