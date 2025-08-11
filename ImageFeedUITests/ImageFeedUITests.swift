@@ -96,4 +96,6 @@ final class ImageFeedUITests: XCTestCase {
         // Проверить, что вернулись на экран авторизации
         XCTAssertTrue(app.buttons["Authenticate"].exists)
     }
+    
+    
 }
