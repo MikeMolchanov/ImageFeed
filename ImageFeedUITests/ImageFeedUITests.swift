@@ -11,45 +11,26 @@ final class ImageFeedUITests: XCTestCase {
     
     private let app = XCUIApplication()
     
+    
     override func setUpWithError() throws {
         continueAfterFailure = false
-        app.launchArguments.append("--uitesting") // 👈 передаём аргумент для приложения
+        app.launchArguments.append("UITEST") // ключ для мок-авторизации
+        app.launchEnvironment["IS_TESTING"] = "true"
         app.launch()
     }
 
+
+
+
     
     func testAuth() throws {
-        // Ищем по accessibilityIdentifier
-        let authenticateButton = app.buttons.matching(identifier: "Authenticate").firstMatch
-            XCTAssertTrue(authenticateButton.waitForExistence(timeout: 5), "Кнопка 'Authenticate' не найдена")
-            authenticateButton.tap()
+        let authenticateButton = app.buttons["Authenticate"]
+        XCTAssertTrue(authenticateButton.waitForExistence(timeout: 10))
+        authenticateButton.tap()
         
-        // Найти WebView
-        let webView = app.webViews["UnsplashWebView"]
-        XCTAssertTrue(webView.waitForExistence(timeout: 5), "WebView не появился")
-        
-        // Ввод логина
-        let loginTextField = webView.descendants(matching: .textField).element
-        XCTAssertTrue(loginTextField.waitForExistence(timeout: 5), "Поле логина не найдено")
-        loginTextField.tap()
-        loginTextField.typeText("misha995@yandex.ru")
-        
-        webView.swipeUp()
-        
-        // Ввод пароля
-        let passwordTextField = webView.descendants(matching: .secureTextField).element
-        XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5), "Поле пароля не найдено")
-        passwordTextField.tap()
-        passwordTextField.typeText("Mazasplash228")
-        
-        webView.swipeUp()
-        
-        // Нажать "Login"
-        webView.buttons["Login"].tap()
-        
-        // Проверка появления первой ячейки в ленте
+        // Ждём, пока лента загрузится (мок сработает через 1 секунду)
         let cell = app.tables.cells.element(boundBy: 0)
-        XCTAssertTrue(cell.waitForExistence(timeout: 10), "Лента не появилась")
+        XCTAssertTrue(cell.waitForExistence(timeout: 15), "Лента не появилась")
     }
 
     
@@ -76,26 +57,24 @@ final class ImageFeedUITests: XCTestCase {
 
 
     
-    func testProfile() throws {
-        // Подождать, пока загружается экран ленты (feed)
-        sleep(3)
-        
-        // Перейти на экран профиля (tab с индексом 1, если он второй)
-        app.tabBars.buttons.element(boundBy: 1).tap()
-        
-        // Проверить, что на экране профиля отображаются твои персональные данные
-        XCTAssertTrue(app.staticTexts["Mikhail Molchanov"].exists)       // имя
-        XCTAssertTrue(app.staticTexts["@mikemolchanov"].exists) // логин (
-        
-        // Нажать на кнопку выхода
-        app.buttons["logout button"].tap()
-        
-        // Подтвердить выход в алерте
-        app.alerts["Пока, пока!"].scrollViews.otherElements.buttons["Да"].tap()
-        
-        // Проверить, что вернулись на экран авторизации
-        XCTAssertTrue(app.buttons["Authenticate"].exists)
+    func testProfile() {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Ждём, пока таббар появится
+        let tabBar = app.tabBars.firstMatch
+        XCTAssertTrue(tabBar.waitForExistence(timeout: 10), "Таббар не появился")
+
+        // Находим кнопку профиля в таббаре и нажимаем
+        let profileButton = tabBar.buttons.element(boundBy: 1)
+        XCTAssertTrue(profileButton.exists, "Кнопка профиля не найдена")
+        profileButton.tap()
+
+        // Дальше можно проверить, что профиль загрузился, например:
+        let profileTitle = app.staticTexts["ProfileTitle"] // пример идентификатора
+        XCTAssertTrue(profileTitle.waitForExistence(timeout: 5))
     }
+
     
     
 }

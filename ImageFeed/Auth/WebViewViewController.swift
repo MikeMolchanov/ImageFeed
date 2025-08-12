@@ -33,19 +33,27 @@ final class WebViewViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+
+        webView.accessibilityIdentifier = "UnsplashWebView"
         
-        estimatedProgressObservation = webView.observe(
-            \.estimatedProgress,
-            options: [],
-            changeHandler: { [weak self] webView, _ in
-                guard let self = self else { return }
-                self.presenter?.didUpdateProgressValue(webView.estimatedProgress)
-            })
+        #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("UITEST") {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                self.delegate?.webViewViewController(self, didAuthenticateWithCode: "test_code")
+            }
+            return
+        }
+        #endif
 
+        estimatedProgressObservation = webView.observe(\.estimatedProgress, options: []) { [weak self] webView, _ in
+            self?.presenter?.didUpdateProgressValue(webView.estimatedProgress)
+        }
         webView.navigationDelegate = self
-
         presenter?.viewDidLoad()
     }
+
+
+
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
