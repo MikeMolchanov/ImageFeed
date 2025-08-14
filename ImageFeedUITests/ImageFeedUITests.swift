@@ -127,4 +127,5 @@ final class ImageFeedUITests: XCTestCase {
         let authenticateButton = app.buttons["Authenticate"]
         XCTAssertTrue(authenticateButton.waitForExistence(timeout: 5), "Кнопка 'Authenticate' не появилась после выхода")
     }
+    
 }
