@@ -96,6 +96,8 @@ extension ImagesListViewController: UITableViewDataSource {
         let photo = imagesListService.photos[indexPath.row]
         cell.config(with: photo) { [weak self] in
             self?.tableView.reloadRows(at: [indexPath], with: .automatic)
+            cell.accessibilityIdentifier = "feed cell"
+
         }
 
         cell.delegate = self

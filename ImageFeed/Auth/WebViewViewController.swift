@@ -33,6 +33,12 @@ final class WebViewViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        navigationItem.leftBarButtonItem = UIBarButtonItem(
+                barButtonSystemItem: .cancel,
+                target: self,
+                action: #selector(didTapCancel)
+            )
 
         webView.accessibilityIdentifier = "UnsplashWebView"
         
@@ -63,17 +69,26 @@ final class WebViewViewController: UIViewController {
         super.viewWillDisappear(animated)
     }
     
-    func load(request: URLRequest) {
+    public func load(request: URLRequest) {
         webView.load(request)
     } 
     
-    func setProgressValue(_ newValue: Float) {
+    public func setProgressValue(_ newValue: Float) {
         progressView.progress = newValue
     }
 
-    func setProgressHidden(_ isHidden: Bool) {
+    public func setProgressHidden(_ isHidden: Bool) {
         progressView.isHidden = isHidden
     }
+    
+    @objc private func didTapCancel() {
+        delegate?.webViewViewControllerDidCancel(self)
+    }
+    
+    deinit {
+        estimatedProgressObservation?.invalidate()
+    }
+
 }
 
 extension WebViewViewController: WKNavigationDelegate {

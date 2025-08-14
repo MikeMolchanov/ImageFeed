@@ -90,6 +90,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 
                 switch result {
                 case .success(let token):
+                    self.isAuthorizing = false
                     OAuth2TokenStorage.shared.token = token
                     // 1. Закрываем WebView
                     vc.dismiss(animated: true) {
@@ -99,6 +100,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 case .failure(let error):
                     self.showErrorAlert(message: error.localizedDescription)
                 }
+                
             }
         }
     }
