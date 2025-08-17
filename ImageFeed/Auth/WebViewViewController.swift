@@ -42,14 +42,14 @@ final class WebViewViewController: UIViewController {
 
         webView.accessibilityIdentifier = "UnsplashWebView"
         
-        #if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("UITEST") {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                self.delegate?.webViewViewController(self, didAuthenticateWithCode: "test_code")
-            }
-            return
-        }
-        #endif
+//        #if DEBUG
+//        if ProcessInfo.processInfo.arguments.contains("UITEST") {
+//            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+//                self.delegate?.webViewViewController(self, didAuthenticateWithCode: "test_code")
+//            }
+//            return
+//        }
+//        #endif
 
         estimatedProgressObservation = webView.observe(\.estimatedProgress, options: []) { [weak self] webView, _ in
             self?.presenter?.didUpdateProgressValue(webView.estimatedProgress)

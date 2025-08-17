@@ -14,7 +14,7 @@ final class ImageFeedUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         let app = XCUIApplication()
-        app.launchArguments.append("UITests")
+        app.launchArguments.append("--uitesting")
         app.launch()
     }
 
@@ -30,20 +30,19 @@ final class ImageFeedUITests: XCTestCase {
         XCTAssertTrue(webView.waitForExistence(timeout: 5), "WebView не появился")
         
         // Ввести логин
-        let loginTextField = webView.textFields.element
-        XCTAssertTrue(loginTextField.waitForExistence(timeout: 5), "Поле логина не найдено")
-        loginTextField.tap()
-        loginTextField.typeText("misha995@yandex.ru")
-        
-        webView.swipeUp()
-        
-        // Ввести пароль
-        let passwordTextField = webView.secureTextFields.element
-        XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5), "Поле пароля не найдено")
-        passwordTextField.tap()
-        passwordTextField.typeText("Mazasplash228")
-        
-        webView.swipeUp()
+            let loginTextField = webView.textFields.element
+            XCTAssertTrue(loginTextField.waitForExistence(timeout: 5), "Поле логина не найдено")
+            loginTextField.tap()
+            loginTextField.typeText("misha995@yandex.ru")
+            
+            // Ввести пароль (через Paste)
+            let passwordTextField = webView.secureTextFields.element
+            XCTAssertTrue(passwordTextField.waitForExistence(timeout: 5), "Поле пароля не найдено")
+            passwordTextField.tap()
+            
+            UIPasteboard.general.string = "Mazasplash228"
+            passwordTextField.press(forDuration: 1.2) // открыть контекстное меню
+            app.menuItems["Paste"].tap()              // нажать "Paste"
         
         // Нажать "Login"
         let loginButton = webView.buttons["Login"]
@@ -96,10 +95,6 @@ final class ImageFeedUITests: XCTestCase {
     }
     
     func testProfile() throws {
-        // Ждём появления ленты
-        let firstCell = app.cells["feed cell"].firstMatch
-        XCTAssertTrue(firstCell.waitForExistence(timeout: 30), "Лента не появилась")
-        
         // Переход на профиль
         let tabBar = app.tabBars.firstMatch
         XCTAssertTrue(tabBar.waitForExistence(timeout: 10), "Таббар не появился")
@@ -109,19 +104,22 @@ final class ImageFeedUITests: XCTestCase {
         profileButton.tap()
         
         // Проверка данных профиля
-        let nameLabel = app.staticTexts["ProfileName"]
+        let nameLabel = app.staticTexts["Mikhail Molchanov"]
         XCTAssertTrue(nameLabel.waitForExistence(timeout: 5), "Имя пользователя не найдено")
         
-        let loginLabel = app.staticTexts["ProfileLogin"]
+        let loginLabel = app.staticTexts["@mikemolchanov"]
         XCTAssertTrue(loginLabel.exists, "Логин пользователя не найден")
         
-        let descriptionLabel = app.staticTexts["ProfileDescription"]
+        let descriptionLabel = app.staticTexts["mr hotel 2024"]
         XCTAssertTrue(descriptionLabel.exists, "Описание пользователя не найдено")
         
         // Logout
         let logoutButton = app.buttons["Logout"]
         XCTAssertTrue(logoutButton.exists, "Кнопка Logout не найдена")
         logoutButton.tap()
+        
+        // Подтвердить выход в алерте
+        app.alerts["Пока, пока!"].scrollViews.otherElements.buttons["Да"].tap()
         
         // Проверяем, что открылся экран авторизации
         let authenticateButton = app.buttons["Authenticate"]

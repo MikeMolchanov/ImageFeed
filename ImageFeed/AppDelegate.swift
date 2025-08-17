@@ -13,11 +13,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
-#if DEBUG
-        if ProcessInfo.processInfo.arguments.contains("UITests") {
-            OAuth2TokenStorage.shared.token = "TEST_TOKEN"
-        }
-#endif
+//#if DEBUG
+//        if ProcessInfo.processInfo.arguments.contains("UITests") {
+//            OAuth2TokenStorage.shared.token = "TEST_TOKEN"
+//        }
+//#endif
         
         return true
     }

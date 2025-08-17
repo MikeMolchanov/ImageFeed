@@ -113,8 +113,7 @@ final class ProfileViewController: UIViewController {
             logoutButton.widthAnchor.constraint(equalToConstant: 24),
             logoutButton.heightAnchor.constraint(equalToConstant: 24)
         ])
-        logoutButton.accessibilityIdentifier = "logout button"
-        logoutButton.accessibilityLabel = "logout button"
+        logoutButton.accessibilityIdentifier = "Logout"
 
         logoutButton.addTarget(self, action: #selector(didTapLogoutButton), for: .touchUpInside)
     }

@@ -92,18 +92,22 @@ extension ImagesListViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: ImagesListCell.reuseIdentifier,
+            for: indexPath
+        ) as? ImagesListCell else {
+            assertionFailure("Не удалось кастануть ячейку в ImagesListCell")
+            return UITableViewCell()
+        }
+        
         let photo = imagesListService.photos[indexPath.row]
         cell.config(with: photo) { [weak self] in
-            self?.tableView.reloadRows(at: [indexPath], with: .automatic)
             cell.accessibilityIdentifier = "feed cell"
-
         }
 
         cell.delegate = self
-        // Если ты используешь onLikeButtonTapped (замыкание) - можно оставить:
+
         cell.onLikeButtonTapped = { [weak self] in
-            // дублирует делегат, можно оставить или убрать
             guard let self = self else { return }
             var photo = self.imagesListService.photos[indexPath.row]
             let newIsLiked = !photo.isLiked
@@ -115,20 +119,18 @@ extension ImagesListViewController: UITableViewDataSource {
                     case .success:
                         photo.isLiked = newIsLiked
                         self.imagesListService.photos[indexPath.row] = photo
-                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     case .failure(let error):
                         print("Ошибка при изменении лайка: \(error)")
-
-                        // обработка ошибки
                     }
                 }
             }
         }
+        
         cell.accessibilityIdentifier = "feed cell"
-
         return cell
     }
 }
+
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
@@ -141,7 +143,8 @@ extension ImagesListViewController: ImagesListCellDelegate {
                 UIBlockingProgressHUD.dismiss()
                 switch result {
                 case .success:
-                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+//                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    break
                 case .failure(let error):
                     print("Ошибка при изменении лайка: \(error)")
 
