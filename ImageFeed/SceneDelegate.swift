@@ -11,20 +11,21 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
-
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let scene = (scene as? UIWindowScene) else { return }
-        window = UIWindow(windowScene: scene)                   
-        window?.rootViewController = UIStoryboard(
-            name: "Main",
-            bundle: .main
-        ).instantiateInitialViewController()
-        
+        window = UIWindow(windowScene: scene)
+
+        //  1. Сбрасываем токен в режиме тестирования
+        if ProcessInfo.processInfo.environment["IS_TESTING"] == "true" {
+            OAuth2TokenStorage.shared.token = nil
+        }
+
+        // Загружаем сплэш-экран
         let splashViewController = SplashViewController()
         window?.rootViewController = splashViewController
         window?.makeKeyAndVisible()
-        
     }
+
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.

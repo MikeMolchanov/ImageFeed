@@ -23,24 +23,12 @@ final class ImagesListViewController: UIViewController {
     private let currentDate = Date()
     private let showSingleImageSegueIdentifier = "ShowSingleImage"
     private let imagesListService = ImagesListService()
-    
+    private var isUITest: Bool {
+        ProcessInfo.processInfo.arguments.contains("--uitesting")
+    }
+
     // MARK: - Private Methods
-//    private func configCell(for cell: ImagesListCell, with indexPath: IndexPath) {
-//        let photo = photos[indexPath.row]
-//        cell.dateLabel.text = photo.createdAt?.dateString()
-//        cell.likeButton.setImage(
-//            photo.isLiked ? UIImage(named: "Active") : UIImage(named: "No Active"),
-//            for: .normal
-//        )
-//        // Загрузка изображения из сети
-//        if let url = URL(string: photo.thumbImageURL) {
-//            cell.cellImage.kf.setImage(
-//                with: url,
-//                placeholder: UIImage(named: "Plug"),
-//                options: [.transition(.fade(0.3))]
-//            )
-//        }
-//    }
+    
     private func refreshFeed() {
         imagesListService.photos = [] // Очищаем текущие фото
         imagesListService.fetchPhotosNextPage() // Загружаем свежие
@@ -75,7 +63,6 @@ final class ImagesListViewController: UIViewController {
             
             let photo = imagesListService.photos[indexPath.row]
             viewController.imageURL = URL(string: photo.largeImageURL)
-
         }
     }
 }
@@ -93,53 +80,53 @@ extension ImagesListViewController: UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
         if indexPath.row == imagesListService.photos.count - 1 {
- // последний элемент
-            imagesListService.fetchPhotosNextPage()
+            if !isUITest {
+                imagesListService.fetchPhotosNextPage()
+            }
         }
     }
 }
 extension ImagesListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return imagesListService.photos.count
-
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: ImagesListCell.reuseIdentifier, for: indexPath) as! ImagesListCell
-        var photo = imagesListService.photos[indexPath.row]
-        cell.config(with: photo) { [weak self] in
-            self?.tableView.reloadRows(at: [indexPath], with: .automatic)
+        guard let cell = tableView.dequeueReusableCell(
+            withIdentifier: ImagesListCell.reuseIdentifier,
+            for: indexPath
+        ) as? ImagesListCell else {
+            assertionFailure("Не удалось кастануть ячейку в ImagesListCell")
+            return UITableViewCell()
         }
+        
+        let photo = imagesListService.photos[indexPath.row]
+        cell.config(with: photo) { [weak self] in
+            cell.accessibilityIdentifier = "feed cell"
+        }
+
         cell.delegate = self
+
         cell.onLikeButtonTapped = { [weak self] in
             guard let self = self else { return }
             var photo = self.imagesListService.photos[indexPath.row]
             let newIsLiked = !photo.isLiked
-
             UIBlockingProgressHUD.show()
-
             self.imagesListService.changeLike(photoId: photo.id, isLike: newIsLiked) { result in
                 DispatchQueue.main.async {
                     UIBlockingProgressHUD.dismiss()
-
                     switch result {
                     case .success:
                         photo.isLiked = newIsLiked
                         self.imagesListService.photos[indexPath.row] = photo
-                        self.tableView.reloadRows(at: [indexPath], with: .automatic)
                     case .failure(let error):
-                        print("Ошибка при смене лайка: \(error.localizedDescription)")
-                        let alert = UIAlertController(
-                            title: "Ошибка",
-                            message: "Не удалось поставить лайк. Попробуйте позже.",
-                            preferredStyle: .alert
-                        )
-                        alert.addAction(UIAlertAction(title: "ОК", style: .default))
-                        self.present(alert, animated: true)
+                        print("Ошибка при изменении лайка: \(error)")
                     }
                 }
             }
         }
+        
+        cell.accessibilityIdentifier = "feed cell"
         return cell
     }
 }
@@ -147,33 +134,24 @@ extension ImagesListViewController: UITableViewDataSource {
 extension ImagesListViewController: ImagesListCellDelegate {
     func imageListCellDidTapLike(_ cell: ImagesListCell) {
         guard let indexPath = tableView.indexPath(for: cell) else { return }
-
         let photo = imagesListService.photos[indexPath.row]
 
         UIBlockingProgressHUD.show()
-
         imagesListService.changeLike(photoId: photo.id, isLike: !photo.isLiked) { [weak self] result in
             guard let self = self else { return }
-
             DispatchQueue.main.async {
                 UIBlockingProgressHUD.dismiss()
-
                 switch result {
                 case .success:
-                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+//                    self.tableView.reloadRows(at: [indexPath], with: .automatic)
+                    break
                 case .failure(let error):
-                    print("Ошибка при смене лайка: \(error.localizedDescription)")
-                    let alert = UIAlertController(
-                        title: "Ошибка",
-                        message: "Не удалось поставить лайк. Попробуйте позже.",
-                        preferredStyle: .alert
-                    )
-                    alert.addAction(UIAlertAction(title: "ОК", style: .default))
-                    self.present(alert, animated: true)
+                    print("Ошибка при изменении лайка: \(error)")
+
+                    // алерт
                 }
             }
         }
     }
 }
-
 

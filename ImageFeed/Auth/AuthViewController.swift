@@ -15,6 +15,9 @@ final class AuthViewController: UIViewController {
     
     weak var delegate: AuthViewControllerDelegate?
     
+    @IBOutlet private weak var loginButton: UIButton!
+
+    
     private let showWebViewSegueIdentifier = "ShowWebView"
     private var isAuthorizing = false  // 1. Объявляем флаг состояния
     
@@ -26,6 +29,10 @@ final class AuthViewController: UIViewController {
                 assertionFailure("Failed to prepare for \(showWebViewSegueIdentifier)")
                 return
             }
+            let authHelper = AuthHelper()
+            let webViewPresenter = WebViewPresenter(authHelper: authHelper)
+            webViewViewController.presenter = webViewPresenter
+            webViewPresenter.view = webViewViewController
             webViewViewController.delegate = self
         } else {
             super.prepare(for: segue, sender: sender)
@@ -37,6 +44,9 @@ final class AuthViewController: UIViewController {
         OAuth2TokenStorage.shared.clearToken()
         
         configureBackButton()
+        
+        loginButton.accessibilityIdentifier = "Authenticate"
+        loginButton.accessibilityLabel = "Authenticate"
     }
     
     private func switchToMainInterface() {
@@ -80,6 +90,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 
                 switch result {
                 case .success(let token):
+                    self.isAuthorizing = false
                     OAuth2TokenStorage.shared.token = token
                     // 1. Закрываем WebView
                     vc.dismiss(animated: true) {
@@ -89,6 +100,7 @@ extension AuthViewController: WebViewViewControllerDelegate {
                 case .failure(let error):
                     self.showErrorAlert(message: error.localizedDescription)
                 }
+                
             }
         }
     }
